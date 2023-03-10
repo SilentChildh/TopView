@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<mapper namespace="com.child.dao.UserDAO">
+    <insert id="insert" resultType="com.child.pojo.UserPO">
+        insert into t_user(name,email,address,oldCar) values(#{name},#{email},#{address}, '特斯拉')
+    </insert>
+
+    <delete id="deleteById">
+        delete from t_user where id = #{id};
+    </delete>
+    <update id="updateById">
+        update t_user set oldCar = #{oldCar} where id = #{id};
+    </update>
+    <select id="selectById" resultType="com.child.pojo.UserPO">
+        select * from t_user where id = #{id};
+    </select>
+    <select id="selectByName" resultType="com.child.pojo.UserPO">
+        select * from t_user where name = #{name};
+    </select>
+</mapper>
