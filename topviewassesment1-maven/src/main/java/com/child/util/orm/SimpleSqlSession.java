@@ -1,18 +1,20 @@
 package com.child.util.orm;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
 import java.sql.*;
 
 import java.util.*;
 
 /**
  * 该sql会话主要用于对数据库进行一系列的操作。集成了操作数据库必要的功能。<br/>
- * 其中{@code close()},{@code commit()},{@code rollback()}方法主要在service层被调用。<bt/>
+ * <p/>
+ * 其中{@code close()},{@code commit()},{@code rollback()}方法主要在service层被调用。<br/>
  * 其中有关CRUD的操作均在dao层被调用。<br/>
  * 该类中的异常均向上抛出，交由调用者进行处理。<br/>
  * SqlSession的作用域应该是局部的，即用完就应该销毁。<br/>
+ * 如果外界调用了无参构造器{@code SimpleSqlSession()}，
+ * 那么应该再次调用{@code createSimpleSqlSession()}方法以获取一个完整的会话类实例。<br/>
  *
  * @author silent_child
  * @version 1.0
@@ -21,7 +23,7 @@ public class SimpleSqlSession implements SqlSession {
     /**
      * 每一个SqlSession实例都将持有一个<strong>唯一</strong>的事务管理器，用于管理事务相关的操作。
      */
-    private final Transaction transaction;
+    private Transaction transaction;
 
     /**
      * 从transaction实例中获取到的连接资源，对于每一个会话类，应该仅持有<strong>唯一</strong>的一份连接资源，
@@ -32,28 +34,23 @@ public class SimpleSqlSession implements SqlSession {
      * 每一个sqlSession实例将拥有{@link SimpleSqlSessionFactory}类中所有SQL语句映射的访问权限。
      * K为sql语句全限定id，V为包含标签信息的对象
      */
-    private final Map<String, MapperStatement> statementMap;
+    private Map<String, MapperStatement> statementMap;
+    /**
+     * 每次调用CRUD操作时，都会进行拦截判断传入的实参类型，从而选择不同的SQL处理器。<br/>
+     * 主要的两种处理器为{@link MapSqlHandler}和{@link ObjectSqlHandler}.<br/>
+     */
+    private SqlHandler sqlHandler;
 
     /**
      * 创建一个SqlSession对象，可以进行都数据库的操作。
      *
      * @param transaction  事务管理器
      * @param statementMap 包含SQL映射语句的集合
+     * @return {@link SimpleSqlSession}
      */
     public SimpleSqlSession(Transaction transaction, Map<String, MapperStatement> statementMap) {
         this.transaction = transaction;
         this.statementMap = statementMap;
-    }
-
-    /**
-     * 获取一个动态代理的SqlSession实例{@link SimpleSqlSessionProxy}。
-     * @return {@link SimpleSqlSession}
-     */
-    public SimpleSqlSession createSimpleSqlSession() {
-        Class<SimpleSqlSession> simpleSqlSessionClass = SimpleSqlSession.class;
-
-        return (SimpleSqlSession) Proxy.newProxyInstance(simpleSqlSessionClass.getClassLoader(),
-                simpleSqlSessionClass.getInterfaces(), new SimpleSqlSessionProxy());
     }
 
 
@@ -128,6 +125,8 @@ public class SimpleSqlSession implements SqlSession {
     @Override
     public int update(String sqlId, Object parameters) throws SQLException {
         openConnection();// 开启连接资源
+        setSqlHandler(parameters);// 设置SQL处理器
+
         // 根据全限定id，即statement获取对应的SQL映射对象
         MapperStatement mapperStatement = statementMap.get(sqlId);
         // 获取对应的原生SQL语句
@@ -135,9 +134,8 @@ public class SimpleSqlSession implements SqlSession {
 
         // 获取可以立即执行的preparedStatement实例
         // try-with-resources自动关闭资源
-        try (PreparedStatement preparedStatement = parameters instanceof Map ?
-                SimpleSqlSessionUtil.sqlHandler(connection, prototypeSql, (Map<String, Object>) parameters) :
-                SimpleSqlSessionUtil.sqlHandler(connection, prototypeSql, parameters)) {
+        try (PreparedStatement preparedStatement =
+                     sqlHandler.sqlHandler(connection, prototypeSql, parameters)) {
 
             return preparedStatement.executeUpdate();// 执行sql语句, 并返回受影响行数
         }
@@ -203,14 +201,14 @@ public class SimpleSqlSession implements SqlSession {
      */
     public <E> List<E> selectList(String sqlId, Object parameters, ResultHandler<?> resultHandler) throws SQLException {
         openConnection();// 开启连接
+        setSqlHandler(parameters);// 设置SQL处理器
 
         MapperStatement mapperStatement = statementMap.get(sqlId);// 获取SQL映射对象
         String prototypeSql = mapperStatement.getPrototypeSql();// 获取原始SQL
 
         // 获取preparedStatement实例，并自动关闭
-        try (PreparedStatement preparedStatement = parameters instanceof Map ?
-                SimpleSqlSessionUtil.sqlHandler(connection, prototypeSql, (Map<String, Object>) parameters) :
-                SimpleSqlSessionUtil.sqlHandler(connection, prototypeSql, parameters)) {
+        try (PreparedStatement preparedStatement =
+                     sqlHandler.sqlHandler(connection, prototypeSql, parameters)) {
             ResultSet resultSet = preparedStatement.executeQuery();// 获取结果集
 
             return (List<E>) resultHandler.handler(resultSet);
@@ -229,15 +227,18 @@ public class SimpleSqlSession implements SqlSession {
         }
     }
 
-    class SimpleSqlSessionProxy implements InvocationHandler {
-        /**
-         * 被代理的会话类
-         */
-        private final SimpleSqlSession simpleSqlSession = new SimpleSqlSession(transaction, statementMap);
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) {
-            if
-            return null;
-        }
+    /**
+     * 用于设置SQL处理器，当传入的单参为Map类型及其子类时，使用{@link MapSqlHandler}，
+     * 否则使用{@link ObjectSqlHandler}.<br/>
+     * <p/>
+     * 该方法应当在每次进行CRUD操作前被调用。<br/>
+     * @param arg 传入的单实参
+     */
+    private void setSqlHandler(Object arg) {
+        // 如果传入的参数类型为Map则设置Map类型的SQL处理器，否则使用Object类型
+        this.sqlHandler =
+                arg instanceof Map ? new MapSqlHandler() : new ObjectSqlHandler();
     }
+
+
 }
