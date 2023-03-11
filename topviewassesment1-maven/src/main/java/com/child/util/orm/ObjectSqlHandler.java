@@ -55,10 +55,14 @@ public class ObjectSqlHandler implements SqlHandler<Object>{
                 // 通过反射获取get方法
                 Method getMethod = parametersClass.getDeclaredMethod(getMethodName);
                 // 调用get方法得到obj中的私有属性，然后给sql语句中的占位符?赋值
-                preparedStatement.setObject(index, getMethod.invoke(parameters));
+                Object invoke = getMethod.invoke(parameters);
+                preparedStatement.setObject(index, invoke);
 
-            } catch (NoSuchMethodException | SQLException | IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
+            } catch (SQLException e) {
+                throw new RuntimeException("赋值失败\n" + e.getMessage());
+            }
+            catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException("反射调用方法出错\n" + e.getMessage());
             }
         });
 

@@ -1,6 +1,5 @@
 package com.child.util.orm;
 
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -50,7 +49,7 @@ public class MapSqlHandler implements SqlHandler<Map<String, Object>> {
                 preparedStatement.setObject(index, obj);
 
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("赋值失败\n" + e.getMessage());
             }
         });
 

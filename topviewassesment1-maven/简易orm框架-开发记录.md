@@ -1189,6 +1189,92 @@ dao代理类的作用是为了将传入的实参转换为单个的Object或者Ma
 
 
 
+关于泛型问题
+
+1. 使用泛型类可以
+
+~~~java
+public interface SqlHandler<T> {
+    PreparedStatement sqlHandler(Connection connection, String prototypeSql, T parameters) throws SQLException;
+}
+
+
+public class MapSqlHandler implements SqlHandler<Map<String, Object>> {
+
+    @Override
+    public PreparedStatement sqlHandler(Connection connection, String prototypeSql,
+                                        Map<String, Object> parameters) throws SQLException
+}
+
+// 编译之后
+public interface SqlHandler<object> {
+    PreparedStatement sqlHandler(Connection connection, String prototypeSql, object parameters) throws SQLException;
+}
+
+
+public class MapSqlHandler implements SqlHandler<Map<String, Object>> {
+
+    @Override
+    public PreparedStatement sqlHandler(Connection connection, String prototypeSql,
+                                        Map<String, Object> parameters) throws SQLException;
+    
+    PreparedStatement sqlHandler(Connection connection, String prototypeSql, object parameters) throws SQLException {
+        this.sqlHandler(Connection connection, String prototypeSql,
+                                        (Map<String, Object>) parameters);
+    }
+        
+}
+~~~
+
+
+
+2. 使用泛型方法不可以
+
+~~~java
+public interface SqlHandler {
+    <T> PreparedStatement sqlHandler(Connection connection, String prototypeSql, T parameters) throws SQLException;
+}
+
+public class MapSqlHandler implements SqlHandler {
+
+    @Override
+    public PreparedStatement sqlHandler(Connection connection, String prototypeSql,
+                                        Map<String, Object> parameters) throws SQLException
+}
+
+// 编译之后
+public interface SqlHandler {
+    <Object> PreparedStatement sqlHandler(Connection connection, String prototypeSql, Object parameters) throws SQLException;
+}
+
+public class MapSqlHandler implements SqlHandler {
+
+    @Override
+    public PreparedStatement sqlHandler(Connection connection, String prototypeSql,
+                                        Map<String, Object> parameters) throws SQLException;
+}
+
+~~~
+
+1. 重写时，方法签名必须和父类/父接口一致。
+2. 对于泛型类的方法来说，当继承了父类或者实现父接口的时候，已经指定了泛型的类型，那么就相当于给父类传入了具体的参数了，随之而变的就是方法的参数类型也确定下来了，故重写的时候就可根据具体的泛型类型编写方法签名。
+3. 对于泛型方法来说，具体的泛型类型是根据调用者传入的实参决定的。故在重写泛型方法时，泛型类型是无法明确指定的，又方法签名需要和父类的一致，故泛型是保留的。
+
+
+
+
+
+# 2023.3.12
+
+关于`SqlHandler`的解析
+
+1. 该方法是为了得到一个`PreparedStatement`
+2. 有三个参数
+    1. 需要一个指定的`Connection`，但这里不应该使用，因为这将导致创建一个`PreparedStatement`需要依赖外部提供的`Connection`
+    2. 
+
+
+
 # 框架关系
 
 <img src="./简易orm关系.png" style="zoom:50%;" />

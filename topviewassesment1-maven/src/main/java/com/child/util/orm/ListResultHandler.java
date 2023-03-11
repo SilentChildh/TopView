@@ -24,7 +24,7 @@ public class ListResultHandler<E> implements ResultHandler<List<E>>{
     /**
      * List集合，用于接收封装了结果集数据的E类型的元素。
      */
-    private final List<Object> list = new ArrayList<>();
+    private final List<E> list = new ArrayList<>();
 
     /**
      * 用于创建结果集处理器，调用者需要传入返回值类型，该类型将会是List集合的元素类型
@@ -58,7 +58,7 @@ public class ListResultHandler<E> implements ResultHandler<List<E>>{
             try {
                 object = resultType.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("创建元素实例失败\n" + e.getMessage());
             }
 
             // 遍历每个记录中的每一列
@@ -85,78 +85,14 @@ public class ListResultHandler<E> implements ResultHandler<List<E>>{
 
                     field.set(object, value);// 赋值
                 } catch (NoSuchFieldException | IllegalAccessException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException("返回值类型的字段不存在\n" + e.getMessage());
                 }
 
             }
             /*最后将装载记录的Object对象放入List集合中*/
-            list.add(object);
+            list.add((E) object);
         }
-        return (List<E>) list;
+        return list;
     }
-
-
-    /**
-     * 该方法使用的是反射获取pojo类中的set方法。
-     */
-/*    @Override
-    public List<E> handler(ResultSet resultSet) throws SQLException {
-        ResultSetMetaData metaData = resultSet.getMetaData();// 获得结果集元信息
-        int columnCount = metaData.getColumnCount();// 获取结果集列数
-
-        *//*接下来遍历所有记录*//*
-        while (resultSet.next()) {
-            Object object;// 创建一个实例，用于装载该条记录的信息
-            try {
-                object = resultType.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-
-            // 遍历每个记录中的每一列
-            for (int i = 1; i <= columnCount; i++) {
-                String columnName = metaData.getColumnName(i);// 获取该列的字段名
-
-                *//*接下来得到符合驼峰命名的字段名*//*
-                StringBuilder stringBuilder = new StringBuilder(columnName);
-                int end = 0;
-                while (true) {
-                    end = stringBuilder.indexOf("_");
-                    if (end == -1) break;
-                    stringBuilder.replace(end, end + 2, String.valueOf(Character.toUpperCase(stringBuilder.charAt(end + 1))));
-                }
-                String filedName = String.valueOf(stringBuilder);// 获取符合驼峰命名的字段名
-
-               *//* 接下来获取字段的类型*//*
-                Class<?> fieldType;
-                try {
-                    fieldType = resultType.getDeclaredField(filedName).getType();// 获取字段数据类型
-                } catch (NoSuchFieldException e) {
-                    throw new RuntimeException(e);
-                }
-
-
-                *//*接下来将记录装载到实例中*//*
-                try {
-                    final String SET = "set";
-                    stringBuilder.setCharAt(0, (char) (stringBuilder.charAt(0) - 32));// 将首字母转换为大写字母
-                    String methodName = SET + stringBuilder;// 最后将其转换为方法名
-
-                    Method method = resultType.getDeclaredMethod(methodName, fieldType);// 获取字段
-                    method.setAccessible(true);// 设置为可访问
-
-                    Object value = resultSet.getObject(columnName);// 获取指定字段下的记录值
-                    method.invoke(object, value);// 赋值
-                } catch (IllegalAccessException |NoSuchMethodException | InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
-
-            }
-            *//*最后将装载记录的Object对象放入List集合中*//*
-            list.add(object);
-        }
-        return (List<E>) list;
-    }*/
-
 
 }

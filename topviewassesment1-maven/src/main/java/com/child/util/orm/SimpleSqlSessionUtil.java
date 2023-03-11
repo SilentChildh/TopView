@@ -131,7 +131,7 @@ public class SimpleSqlSessionUtil {
             }
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("通过包名获取SQL映射集合失败\n" + e.getMessage());
         }
         // 最后返回解析后的SQL映射对象
         return mapperStatementMap;
@@ -186,7 +186,7 @@ public class SimpleSqlSessionUtil {
                             // 返回K-V条目回到流中
                             return parseMapperHandler.getStatementMapper().entrySet();
                         } catch (SAXException | IOException e) {
-                            throw new RuntimeException(e);
+                            throw new RuntimeException("解析Mapper.xml文件失败\n"  +e.getMessage());
                         }
                     })
                     // 将Set<Entry<String, String>>一对多映射为Entry<String, String>，即从Set集合中取出元素
@@ -195,7 +195,7 @@ public class SimpleSqlSessionUtil {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         } catch (ParserConfigurationException | SAXException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("通过目录路径解析Mapper.xml文件失败\n"  +e.getMessage());
         }
 
     }

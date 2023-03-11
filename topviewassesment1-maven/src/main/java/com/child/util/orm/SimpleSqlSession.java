@@ -183,7 +183,7 @@ public class SimpleSqlSession implements SqlSession {
             Class<?> aClass = Class.forName(resultType);// 创建对应返回值类型的Class对象
             return selectList(sqlId, parameters, new ListResultHandler<>(aClass));// 调用
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("创建class对象失败\n" + e.getMessage());
         }
 
     }
