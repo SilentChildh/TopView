@@ -1209,6 +1209,36 @@ dao代理类的作用是为了将传入的实参转换为单个的Object或者Ma
 2. 通过会话工厂类可以开启一段会话，即创建一个会话类
 3. 通过会话可以对数据库进行操作，例如：提交事务、回滚事务、关闭连接、CRUD操作
 4. 编写DAO层接口时，对于方法的形参，您有三种选择，一是传入一个pojo，二是传入一个Map，三是传入多参数，但是每个参数上都必须用注解`@Param`进行修饰。
+5. 在编写DAOImpl实现类时，内部主要有三个操作
+
+    1. 获取会话类，得到操作CRUD的接口
+    2. 将参数进行处理
+    3. 利用会话类和处理好的参数执行CRUD操作
+
+    ~~~java
+    @Override
+        public int updateByName(@Param("name") String name,
+                                @Param("oldCar") String oldCar,
+                                @Param("email") String email) throws SQLException {
+            SqlSession sqlSession = SimpleSqlSessionUtil.openSession();
+            try {
+                Method updateByName = USER_DAO_CLASS.getDeclaredMethod("updateByName", String.class, String.class, String.class);// 得到对应的方法
+                Object[] args = {name, oldCar, email};// 将参数放入数组内
+                Object handle = ParametersHandler.handle(updateByName, args);// 处理参数，返回一个处理好的结果
+                return sqlSession.update("com.child.dao.UserDAO.updateByName", handle);// 传入处理好的结果，并执行CRUD操作
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    
+    <mapper namespace="com.child.dao.UserDAO">
+        <update id="updateByName">
+            update t_user set oldCar = #{oldCar}, email = #{email} where name = #{name};
+        </update>
+    </mapper>
+    ~~~
+
+    
 
 
 
