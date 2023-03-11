@@ -13,18 +13,17 @@ import java.util.Map;
  * @version 1.0
  **/
 
-public class ParametersHandler implements InvocationHandler {
+public class ParametersHandler {
     /**
      * 注解{@link Param}的类对象，将用于判断是否存在该注解。
      */
-    private final Class<? extends Annotation> PARAM_ANNOTATION = Param.class;
+    private static final Class<? extends Annotation> PARAM_ANNOTATION = Param.class;
 
     /**
      * 将多参数转换为单参数。
      * @return {@link Object}, 但实际上有可能是 {@code Map<String, Object>} 或者 其他pojo实例
      */
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) {
+    public static Object handle(Method method, Object[] args) {
         //用于存储原Map集合元素或者被注解修饰的参数。
         final Map<String, Object> parametersMap = new HashMap<>();
         // 获取方法形参的数据
@@ -32,11 +31,10 @@ public class ParametersHandler implements InvocationHandler {
 
         // 特判无参或者只有一个实参且无注解修饰时的情况
         if (parameters.length == 0 || (!parameters[0].isAnnotationPresent(PARAM_ANNOTATION) && parameters.length == 1)) {
-            return args[0];// 调用方法
+            return args[0];
         }
         // 否则进行是否带有的注解判断
         else {
-
             // 如果第一个实参是Map，则将其元素放入代理类中的Map集合中
             if (args[0] instanceof Map) {
                 parametersMap.putAll((Map<String, Object>) args[0]);
