@@ -1289,8 +1289,14 @@ public class MapSqlHandler implements SqlHandler {
 ## 使用手册
 
 1. 通过工具类`SqlSessionUtil`可以创建含有指定数据库环境的会话工厂类`SqlSessionFactory`
+
+    1. 使用工具类的`openSession()`将会自动开启数据库的连接，将会简化开发流程，但是会增加连接池的压力
+
 2. 通过会话工厂类可以开启一段会话，即创建一个会话类
 3. 通过会话可以对数据库进行操作，例如：提交事务、回滚事务、关闭连接、CRUD操作
+
+    1. 需要注意的是，每次对数据库操作之前应该调用`openConnection()`方法。
+
 4. 编写DAO层接口时，对于方法的形参，您有三种选择，一是传入一个pojo，二是传入一个Map，三是传入多参数，但是每个参数上都必须用注解`@Param`进行修饰。
 5. 在编写DAOImpl实现类时，内部主要有三个操作
 
@@ -1321,7 +1327,7 @@ public class MapSqlHandler implements SqlHandler {
         </update>
     </mapper>
     ~~~
-    
+
     
 
 
@@ -1352,8 +1358,6 @@ public class MapSqlHandler implements SqlHandler {
 ## 详细设计
 
 工具类
-
-
 
 
 
