@@ -1,6 +1,6 @@
 package com.child.util;
 
-import com.child.util.orm.JDBCTransaction;
+import com.child.util.orm.JdbcTransaction;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-public class JDBCTransactionTest {
+public class JdbcTransactionTest {
     private final Logger LOGGER = ChildLogger.getLogger();
     private final DataSource DATASOURCE = ChildDataSource.creatDataSource("default-config");
 
@@ -24,8 +24,8 @@ public class JDBCTransactionTest {
      */
     @Test
     void testSingleParamConstructor() {
-        JDBCTransaction jdbcTransaction = new JDBCTransaction(DATASOURCE);
-        Class<?> clazz = JDBCTransaction.class;
+        JdbcTransaction jdbcTransaction = new JdbcTransaction(DATASOURCE);
+        Class<?> clazz = JdbcTransaction.class;
 
         Arrays.stream(clazz.getDeclaredFields()).forEach(field -> {
             field.setAccessible(true);// 设置为可访问
@@ -44,8 +44,8 @@ public class JDBCTransactionTest {
      */
     @Test
     void testDoubleParamConstructor() {
-        JDBCTransaction jdbcTransaction = new JDBCTransaction(DATASOURCE,true);
-        Class<?> clazz = JDBCTransaction.class;
+        JdbcTransaction jdbcTransaction = new JdbcTransaction(DATASOURCE,true);
+        Class<?> clazz = JdbcTransaction.class;
 
         Arrays.stream(clazz.getDeclaredFields()).forEach(field -> {
             field.setAccessible(true);// 设置为可访问
@@ -60,29 +60,29 @@ public class JDBCTransactionTest {
     }
 
     /**
-     * 测试{@link JDBCTransaction#isAutoCommit()}方法，分别测试自动提交和手动提交的方式。<br/>
+     * 测试{@link JdbcTransaction#isAutoCommit()}方法，分别测试自动提交和手动提交的方式。<br/>
      */
     @Test
     void testIsAutoCommit() {
         /*测试手动提交*/
-        JDBCTransaction jdbcTransaction = new JDBCTransaction(DATASOURCE);
+        JdbcTransaction jdbcTransaction = new JdbcTransaction(DATASOURCE);
         boolean condition = jdbcTransaction.isAutoCommit();// 实际状态
         Assertions.assertFalse(condition);// 断言为false
 
         /*测试自动提交*/
-        jdbcTransaction = new JDBCTransaction(DATASOURCE, true);
+        jdbcTransaction = new JdbcTransaction(DATASOURCE, true);
         condition = jdbcTransaction.isAutoCommit();// 实际状态
         Assertions.assertTrue(condition);// 断言为真
     }
 
     /**
-     * 测试{@link JDBCTransaction#setAutoCommit(boolean)}方法，分别测试自动提交和手动提交的方式。<br/>
+     * 测试{@link JdbcTransaction#setAutoCommit(boolean)}方法，分别测试自动提交和手动提交的方式。<br/>
      */
     @Test
     void testSetAutoCommit() {
         /*测试手动提交*/
         // 首先创建一个自动提交的事务管理器
-        JDBCTransaction jdbcTransaction = new JDBCTransaction(DATASOURCE, true);
+        JdbcTransaction jdbcTransaction = new JdbcTransaction(DATASOURCE, true);
         boolean condition = jdbcTransaction.isAutoCommit();// 实际状态
         Assertions.assertTrue(condition);// 断言为真
         // 然后设置为手动提交
@@ -92,7 +92,7 @@ public class JDBCTransactionTest {
 
         /*测试自动提交*/
         // 首先创建一个手动提交的事务管理器
-        jdbcTransaction = new JDBCTransaction(DATASOURCE, false);
+        jdbcTransaction = new JdbcTransaction(DATASOURCE, false);
         condition = jdbcTransaction.isAutoCommit();// 实际状态
         Assertions.assertFalse(condition);// 断言为假
         // 然后设置为自动提交
@@ -102,12 +102,12 @@ public class JDBCTransactionTest {
     }
 
     /**
-     * 测试{@link JDBCTransaction#openConnection()}方法，首先测试一开始为null，开启后不为空。<br/>
+     * 测试{@link JdbcTransaction#openConnection()}方法，首先测试一开始为null，开启后不为空。<br/>
      */
     @Test
      void testOpenConnection() {
-        JDBCTransaction jdbcTransaction = new JDBCTransaction(DATASOURCE);
-        Class<?> clazz = JDBCTransaction.class;
+        JdbcTransaction jdbcTransaction = new JdbcTransaction(DATASOURCE);
+        Class<?> clazz = JdbcTransaction.class;
         try {
             Field connection = clazz.getDeclaredField("connection");// 获取connection属性
             connection.setAccessible(true);// 设置为可访问
@@ -132,7 +132,7 @@ public class JDBCTransactionTest {
      */
     @Test
     void testGetConnection() {
-        JDBCTransaction jdbcTransaction = new JDBCTransaction(DATASOURCE);
+        JdbcTransaction jdbcTransaction = new JdbcTransaction(DATASOURCE);
         try {
             Connection connection = jdbcTransaction.getConnection();// 获取连接
             Assertions.assertNotNull(connection);// 断言不为空
@@ -147,7 +147,7 @@ public class JDBCTransactionTest {
      */
     @Test
     void testClose() {
-        JDBCTransaction jdbcTransaction = new JDBCTransaction(DATASOURCE);
+        JdbcTransaction jdbcTransaction = new JdbcTransaction(DATASOURCE);
         try {
             /*测试未关闭*/
             Connection connection = jdbcTransaction.getConnection();// 获取资源
@@ -167,12 +167,12 @@ public class JDBCTransactionTest {
      * 测试提交事务方式，该测试需要连接数据库，并准备表以及字段进行测试。<br/>
      * <p/>
      * 首先测试手动提交，然后测试自动提交。<br/>
-     * 需要注意的是，在通过{@link JDBCTransaction#setAutoCommit(boolean)}之后，
+     * 需要注意的是，在通过{@link JdbcTransaction#setAutoCommit(boolean)}之后，
      * 需要重新获取全新连接资源，将提交事务的方式作用于新的资源上。<br/>
      */
     @Test
     void testCommit() {
-        JDBCTransaction jdbcTransaction = new JDBCTransaction(DATASOURCE, false);
+        JdbcTransaction jdbcTransaction = new JdbcTransaction(DATASOURCE, false);
         Connection connection;
         try {
             /*测试手动提交， 执行更新后还需提交，否则数据库记录不会更新*/
@@ -204,7 +204,7 @@ public class JDBCTransactionTest {
      */
     @Test
     void testRollback() {
-        JDBCTransaction jdbcTransaction = new JDBCTransaction(DATASOURCE, false);
+        JdbcTransaction jdbcTransaction = new JdbcTransaction(DATASOURCE, false);
         // 获取连接
         Connection connection = null;
         try {

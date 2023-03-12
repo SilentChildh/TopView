@@ -8,9 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 public class UserDaoTest {
@@ -29,7 +27,6 @@ public class UserDaoTest {
         SqlSession sqlSession = null;
         try {
             sqlSession = SimpleSqlSessionUtil.openSession("default-config");
-            sqlSession.openConnection();
             Assertions.assertNotEquals(0, userDAO.insert(userPO));
             sqlSession.commit();
         } catch (SQLException e) {
@@ -50,13 +47,12 @@ public class UserDaoTest {
     }
     @Test
     void testDeleteById() {
-
         UserDAO userDAO = new UserDAOImpl();
         SqlSession sqlSession = null;
+        /*在删除增加的记录*/
         try {
             sqlSession = SimpleSqlSessionUtil.openSession();
-            sqlSession.openConnection();
-            Assertions.assertNotEquals(0, userDAO.deleteById(225L));
+            Assertions.assertNotEquals(0, userDAO.deleteById(235L));
             sqlSession.commit();
         } catch (SQLException e) {
             try {
@@ -81,7 +77,6 @@ public class UserDaoTest {
         SqlSession sqlSession = null;
         try {
             sqlSession = SimpleSqlSessionUtil.openSession();
-            sqlSession.openConnection();
             Assertions.assertNotEquals(0,
                     userDAO.updateById(226L, "567", "GTR"));
             sqlSession.commit();
@@ -109,7 +104,6 @@ public class UserDaoTest {
         SqlSession sqlSession = null;
         try {
             sqlSession = SimpleSqlSessionUtil.openSession();
-            sqlSession.openConnection();
             List<Object> list = userDAO.selectByName("张三");
             Assertions.assertNotNull(list);
             logger.info(list.toString());
@@ -138,7 +132,6 @@ public class UserDaoTest {
         SqlSession sqlSession = null;
         try {
             sqlSession = SimpleSqlSessionUtil.openSession();
-            sqlSession.openConnection();
             Object obj = userDAO.selectById(235L);
             Assertions.assertNotNull(obj);
             logger.info(obj.toString());
@@ -167,7 +160,6 @@ public class UserDaoTest {
         SqlSession sqlSession = null;
         try {
             sqlSession = SimpleSqlSessionUtil.openSession();
-            sqlSession.openConnection();
             Object obj = userDAO.selectByOldCar("GTR");
             Assertions.assertNotNull(obj);
             logger.info(obj.toString());

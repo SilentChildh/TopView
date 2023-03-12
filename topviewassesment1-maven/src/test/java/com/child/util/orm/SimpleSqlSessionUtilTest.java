@@ -1,20 +1,20 @@
-package com.child.util;
+package com.child.util.orm;
 
-import com.child.pojo.UserPO;
-import com.child.util.orm.MapperStatement;
-import com.child.util.orm.SimpleSqlSessionUtil;
-import com.child.util.orm.SqlSessionFactory;
+import com.child.util.ChildLogger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class SimpleSqlSessionUtilTest {
+import static org.junit.jupiter.api.Assertions.*;
+
+class SimpleSqlSessionUtilTest {
     public static final String DEFAULT_CONFIG = "default-config";
     public static final Logger LOGGER = ChildLogger.getLogger();
 
@@ -48,17 +48,16 @@ public class SimpleSqlSessionUtilTest {
             // 断言此时元素数量还是1
             Assertions.assertEquals(1, mapperStatementMap.size());
 
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException | SQLException e) {
             throw new RuntimeException(e);
         }
     }
-
     /**
      * 测试{@link SimpleSqlSessionUtil#build(String)}方法。<br/>
      * 首先准备一个配置文件，然后通过build方法得到工厂类，再将工厂类的信息进行打印。
      */
     @Test
-    void testBuild() {
+    void build() {
         SqlSessionFactory factory = SimpleSqlSessionUtil.build(DEFAULT_CONFIG);
         Class<? extends SqlSessionFactory> aClass = factory.getClass();
         Arrays.stream(aClass.getDeclaredFields()).forEach(field -> {
@@ -73,18 +72,6 @@ public class SimpleSqlSessionUtilTest {
     }
 
 
-
-    /**
-     * 测试解析原生SQL映射语句，即是否能从符合数据库和orm语法的sql语句转变未符合JDBC语法规范的SQL语句.
-     */
-    @Test
-    void testParsePrototypeSql() {
-        String prototypeSql =
-                "insert into t_user (id, name, email, address, oldCar)" +
-                        " values (#{id}, #{name}, #{email}, #{address}, #{oldCar})";
-        String s = SimpleSqlSessionUtil.parsePrototypeSql(prototypeSql);
-        LOGGER.info(s);
-    }
 
     /**
      * 测试从文件目录路径中的配置文件中获取SQL映射集合。

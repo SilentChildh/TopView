@@ -1,10 +1,8 @@
-package com.child.util;
+package com.child.util.orm;
 
 import com.child.pojo.UserPO;
-import com.child.util.orm.JDBCTransaction;
-import com.child.util.orm.MapperStatement;
-import com.child.util.orm.SimpleSqlSession;
-import com.child.util.orm.Transaction;
+import com.child.util.ChildDataSource;
+import com.child.util.ChildLogger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -17,13 +15,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
 public class SimpleSqlSessionTest {
     public static final DataSource DATASOURCE = ChildDataSource.creatDataSource("default-config");
-    public static final Transaction TRANSACTION = new JDBCTransaction(DATASOURCE);
-    public static final Transaction TRANSACTION_AUTO_COMMIT = new JDBCTransaction(DATASOURCE, true);
+    public static final Transaction TRANSACTION = new JdbcTransaction(DATASOURCE);
+    public static final Transaction TRANSACTION_AUTO_COMMIT = new JdbcTransaction(DATASOURCE, true);
     public static final Map<String, MapperStatement> mapper = new HashMap<>();
     public static final Logger LOGGER = ChildLogger.getLogger();
     /**
@@ -413,8 +412,55 @@ public class SimpleSqlSessionTest {
         }
 
     }
+
+    /**
+     * 测试查询多条记录。<br/>
+     */
     @Test
     void testSelectList() {
+        /*模拟Mapper映射*/
+        String sqlId = "com.child.dao.UserDAO.selectByName";
+        String prototypeSql = "select * from t_user where name = #{name};";
+        String sqlType = "select";
+        String resultType = "com.child.pojo.UserPO";
+        // 在映射集合中添加一条SQL映射
+        MapperStatement mapperStatement = new MapperStatement(sqlId, sqlType, prototypeSql, resultType);
+        mapper.put(sqlId, mapperStatement);
+
+        UserPO userPO = new UserPO(null, "李四", null, null, null);
+        try (SimpleSqlSession simpleSqlSession = new SimpleSqlSession(TRANSACTION, mapper)) {
+            List<Object> list = simpleSqlSession.selectList(sqlId, userPO);
+            // 断言执行成功
+            Assertions.assertNotNull(list);
+            LOGGER.info(list.toString());
+            simpleSqlSession.commit();// 提交事务
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @Test
+    void testSelectOne() {
+        /*模拟Mapper映射*/
+        String sqlId = "com.child.dao.UserDAO.selectByName";
+        String prototypeSql = "select * from t_user where id = #{id};";
+        String sqlType = "select";
+        String resultType = "com.child.pojo.UserPO";
+        // 在映射集合中添加一条SQL映射
+        MapperStatement mapperStatement = new MapperStatement(sqlId, sqlType, prototypeSql, resultType);
+        mapper.put(sqlId, mapperStatement);
+
+        UserPO userPO = new UserPO(222L, null, null, null, null);
+        try (SimpleSqlSession simpleSqlSession = new SimpleSqlSession(TRANSACTION, mapper)) {
+            Object object = simpleSqlSession.selectOne(sqlId, userPO);
+            // 断言执行成功
+            Assertions.assertNotNull(object);
+            LOGGER.info(object.toString());
+            simpleSqlSession.commit();// 提交事务
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
