@@ -2,6 +2,13 @@ package com.child.pojo;
 
 import java.util.Objects;
 
+/**
+ * 用户表
+ *
+ * @author silent_child
+ * @version 1.0.0
+ * @date 2023/03/12
+ */
 public class UserPO {
     private Long id;
     private String name;
@@ -24,13 +31,18 @@ public class UserPO {
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", address='" + address + '\'' +
+                ", oldCar='" + oldCar + '\'' +
                 '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         UserPO userPO = (UserPO) o;
         return Objects.equals(id, userPO.id) && Objects.equals(name, userPO.name) && Objects.equals(email, userPO.email) && Objects.equals(address, userPO.address);
     }

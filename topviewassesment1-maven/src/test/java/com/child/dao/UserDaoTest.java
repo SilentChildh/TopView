@@ -26,110 +26,167 @@ public class UserDaoTest {
         userPO.setOldCar("宝马");
 
         UserDAO userDAO = new UserDAOImpl();
-        try (SqlSession sqlSession = SimpleSqlSessionUtil.openSession("default-config")) {
-            System.out.println(userDAO.insert(userPO));
+        SqlSession sqlSession = null;
+        try {
+            sqlSession = SimpleSqlSessionUtil.openSession("default-config");
+            sqlSession.openConnection();
+            Assertions.assertNotEquals(0, userDAO.insert(userPO));
             sqlSession.commit();
         } catch (SQLException e) {
+            try {
+                sqlSession.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             throw new RuntimeException("添加记录失败" + e);
         }
-    }
-    @Test
-    void testInsertWithMap() {
-
-        Map<String, Object> map = new HashMap<>();
-
-        map.put("name", "梅花");
-        map.put("email", "@qq.com");
-        map.put("address", "shanghai");
-        map.put("oldCar", "奔驰");
-
-        UserDAOImpl userDAO = new UserDAOImpl();
-        try (SqlSession sqlSession = SimpleSqlSessionUtil.openSession()) {
-            Assertions.assertNotEquals(0, userDAO.insert(map));
-            sqlSession.commit();
-        } catch (SQLException e) {
-            throw new RuntimeException("添加记录失败" + e);
+        finally {
+            try {
+                sqlSession.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
     @Test
     void testDeleteById() {
 
-        UserPO userPO = new UserPO();
-        userPO.setId(26L);
-
         UserDAO userDAO = new UserDAOImpl();
-        try (SqlSession sqlSession = SimpleSqlSessionUtil.openSession()) {
-            System.out.println(userDAO.deleteById(userPO));
+        SqlSession sqlSession = null;
+        try {
+            sqlSession = SimpleSqlSessionUtil.openSession();
+            sqlSession.openConnection();
+            Assertions.assertNotEquals(0, userDAO.deleteById(225L));
             sqlSession.commit();
         } catch (SQLException e) {
+            try {
+                sqlSession.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             throw new RuntimeException("添加记录失败" + e);
+        }
+        finally {
+            try {
+                sqlSession.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
     @Test
     void testUpdateById() {
 
-        UserPO userPO = new UserPO();
-        userPO.setId(25L);
-        userPO.setOldCar("特斯拉");
-
         UserDAO userDAO = new UserDAOImpl();
-        try (SqlSession sqlSession = SimpleSqlSessionUtil.openSession()) {
-            System.out.println(userDAO.updateById(userPO));
+        SqlSession sqlSession = null;
+        try {
+            sqlSession = SimpleSqlSessionUtil.openSession();
+            sqlSession.openConnection();
+            Assertions.assertNotEquals(0,
+                    userDAO.updateById(226L, "567", "GTR"));
             sqlSession.commit();
         } catch (SQLException e) {
+            try {
+                sqlSession.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             throw new RuntimeException("添加记录失败" + e);
+        }
+        finally {
+            try {
+                sqlSession.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+
+    @Test
+    void testSelectByNameWithString() {
+        UserDAOImpl userDAO = new UserDAOImpl();
+        SqlSession sqlSession = null;
+        try {
+            sqlSession = SimpleSqlSessionUtil.openSession();
+            sqlSession.openConnection();
+            List<Object> list = userDAO.selectByName("张三");
+            Assertions.assertNotNull(list);
+            logger.info(list.toString());
+
+            sqlSession.commit();
+        } catch (SQLException e) {
+            try {
+                sqlSession.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            throw new RuntimeException("添加记录失败" + e);
+        }
+        finally {
+            try {
+                sqlSession.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     @Test
     void testSelectById() {
-        UserPO userPO = new UserPO(212L, null, null, null);
-        UserDAO userDAO = new UserDAOImpl();
-        try (SqlSession sqlSession = SimpleSqlSessionUtil.openSession()) {
-            UserPO objects = userDAO.selectById(userPO);
-            Assertions.assertNotNull(objects);
-            logger.info(objects.toString());
+        UserDAOImpl userDAO = new UserDAOImpl();
+        SqlSession sqlSession = null;
+        try {
+            sqlSession = SimpleSqlSessionUtil.openSession();
+            sqlSession.openConnection();
+            Object obj = userDAO.selectById(235L);
+            Assertions.assertNotNull(obj);
+            logger.info(obj.toString());
+
+            sqlSession.commit();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            try {
+                sqlSession.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            throw new RuntimeException("添加记录失败" + e);
+        }
+        finally {
+            try {
+                sqlSession.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     @Test
-    void testSelectByName() {
-        UserPO userPO = new UserPO(null, "张三", null, null);
-        UserDAO userDAO = new UserDAOImpl();
-        try (SqlSession sqlSession = SimpleSqlSessionUtil.openSession()) {
-            List<Object> objects = userDAO.selectByName(userPO);
-            Assertions.assertNotNull(objects);
-            logger.info(objects.toString());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    @Test
-    void testSelectByNameWithString() {
-        String name = "李四";
+    void testSelectByOldCar() {
         UserDAOImpl userDAO = new UserDAOImpl();
-        try (SqlSession sqlSession = SimpleSqlSessionUtil.openSession()) {
-            List<Object> objects = userDAO.selectByName(name);
-            Assertions.assertNotNull(objects);
-            logger.info(objects.toString());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+        SqlSession sqlSession = null;
+        try {
+            sqlSession = SimpleSqlSessionUtil.openSession();
+            sqlSession.openConnection();
+            Object obj = userDAO.selectByOldCar("GTR");
+            Assertions.assertNotNull(obj);
+            logger.info(obj.toString());
 
-    @Test
-    void testSelectByNameWithMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("name", "梅花");
-        UserDAOImpl userDAO = new UserDAOImpl();
-        try (SqlSession sqlSession = SimpleSqlSessionUtil.openSession()) {
-            Object objects = userDAO.selectByName(map);
-            Assertions.assertNotNull(objects);
-            logger.info(objects.toString());
+            sqlSession.commit();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            try {
+                sqlSession.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            throw new RuntimeException("添加记录失败" + e);
+        }
+        finally {
+            try {
+                sqlSession.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }
