@@ -1266,12 +1266,9 @@ public class MapSqlHandler implements SqlHandler {
 
 # 2023.3.12
 
-关于`SqlHandler`的解析
+因为在解析XML时，扫描的是整个类路径，故由于src和test都有相同的包，故会扫描两次.
 
-1. 该方法是为了得到一个`PreparedStatement`
-2. 有三个参数
-    1. 需要一个指定的`Connection`，但这里不应该使用，因为这将导致创建一个`PreparedStatement`需要依赖外部提供的`Connection`
-    2. 
+解析xml时，注意不能多线程。
 
 
 
@@ -1302,20 +1299,21 @@ public class MapSqlHandler implements SqlHandler {
     3. 利用会话类和处理好的参数执行CRUD操作
 
     ~~~java
-    @Override
-        public int updateByName(@Param("name") String name,
-                                @Param("oldCar") String oldCar,
-                                @Param("email") String email) throws SQLException {
-            SqlSession sqlSession = SimpleSqlSessionUtil.openSession();
-            try {
-                Method updateByName = USER_DAO_CLASS.getDeclaredMethod("updateByName", String.class, String.class, String.class);// 得到对应的方法
-                Object[] args = {name, oldCar, email};// 将参数放入数组内
-                Object handle = ParametersHandler.handle(updateByName, args);// 处理参数，返回一个处理好的结果
-                return sqlSession.update("com.child.dao.UserDAO.updateByName", handle);// 传入处理好的结果，并执行CRUD操作
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
+    public class UserDAOImpl implements UserDAO{
+        public static final Class<UserDAO> USERDAO_CLASS = UserDAO.class;
+        @Override
+        public int insert(UserPO userPO) throws SQLException {
+            // 通过工具类获取获取会话
+            SqlSession sqlSession = SimpleSqlSessionUtil.openSession("default-config");
+    
+            // 创建一个参数处理器，并得到处理后的单参数
+            ParametersHandler insert = new ParametersHandler("insert", USERDAO_CLASS, new Object[]{userPO});
+            Object handle = insert.handle();
+    
+            // 将单参数传入，执行sql操作，返回受影响行数
+            return sqlSession.insert("com.child.dao.UserDAO.insert", handle);
         }
+    }
     
     <mapper namespace="com.child.dao.UserDAO">
         <update id="updateByName">
@@ -1323,7 +1321,7 @@ public class MapSqlHandler implements SqlHandler {
         </update>
     </mapper>
     ~~~
-
+    
     
 
 
