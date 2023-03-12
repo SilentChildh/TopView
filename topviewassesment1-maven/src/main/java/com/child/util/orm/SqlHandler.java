@@ -1,6 +1,5 @@
 package com.child.util.orm;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -17,13 +16,13 @@ import java.util.Map;
 public interface SqlHandler<T> {
     /**
      * 核心方法，用于处理SQL语句，并将{@code parameters}中的数据赋值给PreparedStatement实例，最后返回该实例。<br/>
-     * @param connection 指定连接资源
-     * @param prototypeSql 需要解析的SQL语句
-     * @param parameters 带有具体数据的实例
+     *
+     * @param parameters           带有具体数据的实例
+     * @param forPreparedStatement 包含了创建所需要的参数
      * @return {@link PreparedStatement}
      * @throws SQLException 直接向上抛出
      */
-    PreparedStatement sqlHandler(Connection connection, String prototypeSql, T parameters) throws SQLException;
+    PreparedStatement sqlHandler(ForPreparedStatement forPreparedStatement, T parameters) throws SQLException;
 
 
     /**
