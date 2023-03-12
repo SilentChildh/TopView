@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<mapper namespace="com.child.dao.UserDAO">
+    <select id="selectByOldCar" resultType="com.child.pojo.UserPO">
+        select * from t_user where oldCar = #{oldCar};
+    </select>
+</mapper>

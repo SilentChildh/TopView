@@ -8,12 +8,15 @@
     <delete id="deleteById">
         delete from t_user where id = #{id};
     </delete>
+
     <update id="updateById">
-        update t_user set oldCar = #{oldCar} where id = #{id};
+        update t_user set oldCar = #{oldCar}, name = #{name} where id = #{id};
     </update>
+
     <select id="selectById" resultType="com.child.pojo.UserPO">
         select * from t_user where id = #{id};
     </select>
+
     <select id="selectByName" resultType="com.child.pojo.UserPO">
         select * from t_user where name = #{name};
     </select>
