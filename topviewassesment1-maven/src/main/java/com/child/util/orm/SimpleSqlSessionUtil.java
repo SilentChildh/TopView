@@ -197,7 +197,7 @@ public class SimpleSqlSessionUtil {
             SAXParser saxParser = saxParserFactory.newSAXParser();
             // 获取解析器处理器
             ParseMapperHandler parseMapperHandler = new ParseMapperHandler();
-            Map<String, MapperStatement> collect = Arrays.stream(files).parallel()
+            Map<String, MapperStatement> collect = Arrays.stream(files)
                     // 将流中的.xml文件进行解析，返回SQL映射集合的K-V条目
                     .map(x -> {
                         try {
@@ -205,13 +205,15 @@ public class SimpleSqlSessionUtil {
                             // 返回K-V条目回到流中
                             return parseMapperHandler.getStatementMapper().entrySet();
                         } catch (SAXException | IOException e) {
+                            logger.info("解析Mapper.xml文件失败\n" + e.getMessage());
                             throw new RuntimeException("解析Mapper.xml文件失败\n" + e.getMessage());
                         }
                     })
                     // 将Set<Entry<String, String>>一对多映射为Entry<String, String>，即从Set集合中取出元素
                     .flatMap(Set::stream)
                     // 最后通过线程安全的终结管道操作，将流中元素包装进Map集合中进行返回
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (entity1, entity2) -> entity1));
+
             logger.info("通过目录路径解析Mapper.xml文件成功");
             return collect;
 
