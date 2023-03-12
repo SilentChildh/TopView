@@ -11,6 +11,7 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -74,8 +75,9 @@ public class SimpleSqlSessionUtil {
      * 并默认手动提交事务。<br/>
      *
      * @return {@link SqlSession}
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
-    public static SqlSession openSession() {
+    public static SqlSession openSession() throws SQLException {
         return openSession(DEFAULT_DATASOURCE_ENVIRONMENT, false);
     }
 
@@ -84,21 +86,23 @@ public class SimpleSqlSessionUtil {
      * <p/>
      *
      * @param resource 数据库连接资源的全限定类名
-     * @return {@link SqlSession} 返回一个会话类
+     * @return {@link SqlSession}
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
-    public static SqlSession openSession(String resource) {
+    public static SqlSession openSession(String resource) throws SQLException {
         return openSession(resource, false);
     }
 
     /**
      * 通过指定数据库连接资源的全限定类名来得到对应的{@link SqlSession}。<br/>
      * <p/>
-     *
+     * 注意该方法将会自动开启会话类中对数据库的连接。<br/>
      * @param resource   resource 数据库连接资源的全限定类名
      * @param autoCommit 提交事务的方式，true为自动提交，false为手动提交
-     * @return {@link SqlSession} 返回一个会话类
+     * @return {@link SqlSession}
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
-    public static SqlSession openSession(String resource, boolean autoCommit) {
+    public static SqlSession openSession(String resource, boolean autoCommit) throws SQLException {
         // 尝试从sqlSessionFactoryMap集合中获取工厂类
         SqlSessionFactory sqlSessionFactory = SQL_SESSION_FACTORY_MAP.get(resource);
         // 如果不存在该工厂类，那么就build一个出来
@@ -106,7 +110,10 @@ public class SimpleSqlSessionUtil {
             sqlSessionFactory = build(resource);
         }
         // 通过指定工厂获取会话资源并返回
-        return sqlSessionFactory.openSession(autoCommit);
+        SqlSession sqlSession = sqlSessionFactory.openSession(autoCommit);
+        // 开启连接
+        sqlSession.openConnection();
+        return sqlSession;
     }
 
 
