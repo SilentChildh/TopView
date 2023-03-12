@@ -116,6 +116,7 @@ public class SimpleSqlSession implements SqlSession {
     /**
      * 用于更新parameters对象记录，返回受影响行数。
      * <p/>
+     * 将自动开启连接。<br/>
      * 该方法作为dml的核心方法，本类中的{@code insert()}和{@code delete()}方法都将调用该方法执行dml操作。<br/>
      * 该方法将statement，即sql映射位置传给{@code parseStatement()}方法，以便得到JDBC标准slq语句。<br/>
      * 该方法主要将xml文件中的原生sql语句再一次解析得到占位符"#{}"中的字段名，
@@ -154,6 +155,7 @@ public class SimpleSqlSession implements SqlSession {
     /**
      * 用于查询parameters对象记录，返回查询得到的对象。
      * <p/>
+     * 将自动开启连接。<br/>
      * 当查询无果时返回null。<br/>
      * 当查询结果数量大于1时，抛出异常。<br/>
      * 当且仅当查询结果为1个时，返回查询对象。<br/>
@@ -186,7 +188,7 @@ public class SimpleSqlSession implements SqlSession {
     /**
      * 用于查询parameters对象记录，返回查询得到的所有对象。<br/>
      * <p/>
-     *
+     * 将自动开启连接。<br/>
      * @param sqlId      SQL语句的全限定id
      * @param parameters 查询的对象
      * @param <E>        泛型，用于限制集合中元素类型
@@ -213,7 +215,7 @@ public class SimpleSqlSession implements SqlSession {
     /**
      * 用于查询parameters对象记录，返回查询得到的所有对象.<br/>
      * <p/>
-     *
+     * 将自动开启连接。<br/>
      * @param sqlId         SQL语句的全限定id
      * @param parameters    查询的对象
      * @param resultHandler 结果集处理器，其中利用通配符<?>声明是为了可以传入任意的结果集处理器
@@ -245,12 +247,11 @@ public class SimpleSqlSession implements SqlSession {
     }
 
     /**
-     * 打开连接
-     * 私有方法，用于本类确保在对数据库进行操作时，都能打开连接资源。<br/>
+     * 公开方法，需要调用本类的方法时，都应该先确保打开连接资源。<br/>
      *
      * @throws SQLException 直接向上抛出异常不做处理
      */
-    private void openConnection() throws SQLException {
+    public void openConnection() throws SQLException {
 
         if (connection == null) {
             connection = transaction.getConnection();
@@ -272,7 +273,7 @@ public class SimpleSqlSession implements SqlSession {
         // 如果传入的参数类型为Map则设置Map类型的SQL处理器，否则使用Object类型
         this.sqlHandler =
                 arg instanceof Map ? new MapSqlHandler() : new ObjectSqlHandler();
-        logger.info("SQL处理设置成功");
+        logger.info("SQL处理器设置成功");
     }
 
     private static final Logger logger = ChildLogger.getLogger();
