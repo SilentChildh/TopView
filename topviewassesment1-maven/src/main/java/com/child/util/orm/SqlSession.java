@@ -83,4 +83,11 @@ public interface SqlSession extends AutoCloseable {
      * @throws SQLException sqlexception异常，直接向上抛出
      */
     <E> List<E> selectList(String sqlId, Object parameters) throws SQLException;
+
+    /**
+     * 打开连接。每次对数据库进行操作前，都应该打开连接资源。<br/>
+     *
+     * @throws SQLException sqlexception异常
+     */
+    void openConnection() throws SQLException;
 }
