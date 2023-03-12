@@ -8,22 +8,54 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 用于在执行CRUD操作前，将外界传入的多参数转换为单参数，即Map或者Object实例
+ * 用于在执行CRUD操作前，将外界传入的多参数转换为单参数，即Map或者Object实例.
+ *
  * @author silent_child
- * @version 1.0
- **/
+ * @version 1.0.0
+ * @date 2023/03/12
+ */
 
 public class ParametersHandler {
     /**
      * 注解{@link Param}的类对象，将用于判断是否存在该注解。
      */
     private static final Class<? extends Annotation> PARAM_ANNOTATION = Param.class;
+    /**
+     * 指定方法的方法名
+     */
+    private String methodName;
 
     /**
-     * 将多参数转换为单参数。
-     * @return {@link Object}, 但实际上有可能是 {@code Map<String, Object>} 或者 其他pojo实例
+     * 指定类的类对象，该类与应持有指定的方法
      */
-    public static Object handle(Method method, Object[] args) {
+    private Class<?> clazz;
+    /**
+     * 实参参数数组
+     */
+    private Object[] args;
+
+
+    /**
+     * 创建一个{@link ParametersHandler}
+     *
+     * @param methodName 指定方法的方法名
+     * @param clazz      指定类的类对象，该类与应持有指定的方法
+     * @param args       实参参数数组
+     */
+    public ParametersHandler(String methodName, Class<?> clazz, Object[] args) {
+        this.methodName = methodName;
+        this.clazz = clazz;
+        this.args = args;
+    }
+
+    /**
+     * 将多参数转换为单参数。<br/>
+     *
+     * @return {@link Object} 返回一个单参数
+     */
+    public Object handle() {
+        // 得到对应的方法
+        Method method = this.findMethod();
         // 用于存储原Map集合元素或者被注解修饰的参数。
         // noinspection AlibabaCollectionInitShouldAssignCapacity
         final Map<String, Object> parametersMap = new HashMap<>();
@@ -57,5 +89,26 @@ public class ParametersHandler {
             return parametersMap;
 
         }
+    }
+
+    /**
+     * 通过指定类以及方法名找到类中的方法。<br/>
+     * <p/>
+     * 当找到方法是返回{@link Method}，否则直接抛出异常。<br/>
+     *
+     * @return {@link Method}
+     */
+    private Method findMethod() {
+        // 获取指定类的所有方法
+        Method[] declaredMethods = clazz.getDeclaredMethods();
+
+        for (Method declaredMethod : declaredMethods) {
+            // 如果找到该方法则返回
+            if (methodName.equals(declaredMethod.getName())) {
+                return declaredMethod;
+            }
+        }
+        // 否则直接抛出异常
+        throw new RuntimeException("未找到指定方法");
     }
 }
