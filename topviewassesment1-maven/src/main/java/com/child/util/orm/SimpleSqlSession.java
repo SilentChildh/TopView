@@ -140,11 +140,14 @@ public class SimpleSqlSession implements SqlSession {
         // 获取对应的原生SQL语句
         String prototypeSql = mapperStatement.getPrototypeSql();
 
+        /*封装数据*/
+        ForPreparedStatement forPreparedStatement = new ForPreparedStatement(connection, prototypeSql);
+
         /*获取可以立即执行的preparedStatement实例,
           try-with-resources自动关闭资源
          */
         try (PreparedStatement preparedStatement =
-                     sqlHandler.sqlHandler(connection, prototypeSql, parameters)) {
+                     sqlHandler.sqlHandler(forPreparedStatement, parameters)) {
             int rowCount = preparedStatement.executeUpdate();
             logger.info("记录更新成功");
             // 执行sql语句, 并返回受影响行数
@@ -234,9 +237,12 @@ public class SimpleSqlSession implements SqlSession {
         // 获取原始SQL
         String prototypeSql = mapperStatement.getPrototypeSql();
 
+        /*封装数据*/
+        ForPreparedStatement forPreparedStatement = new ForPreparedStatement(connection, prototypeSql);
+
         // 获取preparedStatement实例，并自动关闭
         try (PreparedStatement preparedStatement =
-                     sqlHandler.sqlHandler(connection, prototypeSql, parameters)) {
+                     sqlHandler.sqlHandler(forPreparedStatement, parameters)) {
             // 获取结果集
             ResultSet resultSet = preparedStatement.executeQuery();
             List<E> res = (List<E>) resultHandler.handler(resultSet);
