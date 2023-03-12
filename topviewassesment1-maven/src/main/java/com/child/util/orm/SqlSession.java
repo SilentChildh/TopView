@@ -8,9 +8,11 @@ import java.util.List;
  * <p/>
  * 需要注意的是，对于提交事务相关的异常直接向上抛出，不在内部进行额外的处理。<br/>
  * 并且每一个SqlSession实例的作用范围应该是请求域，即局部作用域。<br/>
+ *
  * @author silent_child
- * @version 1.0
- **/
+ * @version 1.0.0
+ * @date 2023/03/12
+ */
 
 public interface SqlSession extends AutoCloseable {
     /**
