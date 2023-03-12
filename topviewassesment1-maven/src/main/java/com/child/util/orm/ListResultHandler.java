@@ -1,19 +1,25 @@
 package com.child.util.orm;
 
 
+import com.child.util.ChildLogger;
+
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * 继承了{@link ResultHandler}接口，该类将作为结果集的处理器，
  * 调用方法{@code handler()}后将会另结果集封装在List集合中，并返回List集合。<br/>
  * 泛型E限制了List集合中的元素类型，
  * 为父接口传入泛型参数List<E>用于声明{@code handler()}方法返回的是List<E>。<br/>
- * @param <E> 集合中元素的类型
+ *
+ * @author silent_child
+ * @version 1.0.0
+ * @date 2023/03/12
  */
 public class ListResultHandler<E> implements ResultHandler<List<E>>{
 
@@ -48,8 +54,10 @@ public class ListResultHandler<E> implements ResultHandler<List<E>>{
      */
     @Override
     public List<E> handler(ResultSet resultSet) throws SQLException {
-        ResultSetMetaData metaData = resultSet.getMetaData();// 获得结果集元信息
-        int columnCount = metaData.getColumnCount();// 获取结果集列数
+        // 获得结果集元信息
+        ResultSetMetaData metaData = resultSet.getMetaData();
+        // 获取结果集列数
+        int columnCount = metaData.getColumnCount();
 
         /*接下来遍历所有记录*/
         while (resultSet.next()) {
@@ -63,27 +71,35 @@ public class ListResultHandler<E> implements ResultHandler<List<E>>{
 
             // 遍历每个记录中的每一列
             for (int i = 1; i <= columnCount; i++) {
-                String columnName = metaData.getColumnName(i);// 获取该列的字段名
+                // 获取该列的字段名
+                String columnName = metaData.getColumnName(i);
 
                 /*接下来得到符合驼峰命名的字段名*/
                 StringBuilder stringBuilder = new StringBuilder(columnName);
                 int end = 0;
                 while (true) {
                     end = stringBuilder.indexOf("_");
-                    if (end == -1) break;
+                    if (end == -1) {
+                        break;
+                    }
                     stringBuilder.replace(end, end + 2, String.valueOf((char)(stringBuilder.charAt(end + 1) - 32)));
                 }
-                String filedName = String.valueOf(stringBuilder);// 获取符合驼峰命名的字段名
+                // 获取符合驼峰命名的字段名
+                String filedName = String.valueOf(stringBuilder);
 
                 /*接下来将记录装载到实例中*/
                 try {
 
-                    Field field = resultType.getDeclaredField(filedName);// 获取字段
-                    field.setAccessible(true);// 设置为可访问
+                    // 获取字段
+                    Field field = resultType.getDeclaredField(filedName);
+                    // 设置为可访问
+                    field.setAccessible(true);
 
-                    Object value = resultSet.getObject(columnName);// 获取指定字段下的记录值
+                    // 获取指定字段下的记录值
+                    Object value = resultSet.getObject(columnName);
 
-                    field.set(object, value);// 赋值
+                    // 赋值
+                    field.set(object, value);
                 } catch (NoSuchFieldException | IllegalAccessException e) {
                     throw new RuntimeException("返回值类型的字段不存在\n" + e.getMessage());
                 }
@@ -92,7 +108,9 @@ public class ListResultHandler<E> implements ResultHandler<List<E>>{
             /*最后将装载记录的Object对象放入List集合中*/
             list.add((E) object);
         }
+        logger.info("结果集收集为List集合成功");
         return list;
     }
+    public static final Logger logger = ChildLogger.getLogger();
 
 }

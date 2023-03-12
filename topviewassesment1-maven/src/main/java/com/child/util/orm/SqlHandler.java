@@ -38,8 +38,10 @@ public interface SqlHandler<T> {
     default String parsePrototypeSql(String prototypeSql) {
         // 正则表达式，用于将整个占位符"#{}"的所有内容替换为"?"
         String tempSql = prototypeSql.replaceAll("#\\{[a-zA-Z0-9_$]*}", "?");
-        StringBuilder sql = new StringBuilder(tempSql);// 对字符串进行操作
-        String[] words = prototypeSql.split("[\\s,()]");// 以空格、逗号、括号分割
+        // 对字符串进行操作
+        StringBuilder sql = new StringBuilder(tempSql);
+        // 以空格、逗号、括号分割
+        String[] words = prototypeSql.split("[\\s,()]");
 
         for (String word : words) {
             for (int j = 0; j < word.length() - 1; j++) {
@@ -51,10 +53,14 @@ public interface SqlHandler<T> {
                     StringBuilder newWord = new StringBuilder(word);
                     newWord.replace(j + 1, j + 2, replace);
 
-                    int wordIndex = sql.indexOf(word);// 找到原sql中该单词的位置
-                    if (wordIndex == -1) break;
+                    // 找到原sql中该单词的位置
+                    int wordIndex = sql.indexOf(word);
+                    if (wordIndex == -1) {
+                        break;
+                    }
 
-                    sql.replace(wordIndex, wordIndex + word.length(), newWord.toString());// 对原SQL进行替换
+                    // 对原SQL进行替换
+                    sql.replace(wordIndex, wordIndex + word.length(), newWord.toString());
 
                 }
             }
@@ -69,20 +75,35 @@ public interface SqlHandler<T> {
      * @return {@link Map}
      */
     default Map<Integer, String> fieldMap(String prototypeSql) {
-        Map<Integer, String> field = new HashMap<>();// 存放占位符"#{}"中查询得到的次序和属性名
-        final String LEFT = "#{";// 占位符的左半边
-        final String RIGHT = "}";// 占位符的右半边
-        int begin;// 子串的起始位置
-        int end;// 子串的最终位置
-        int fromIndex = 0;// 开始查询字符串的位置
-        int i = 1;// 记录占位符出现的次序
+        // 存放占位符"#{}"中查询得到的次序和属性名
+        // noinspection AlibabaCollectionInitShouldAssignCapacity
+        Map<Integer, String> field = new HashMap<>();
+        // 占位符的左半边
+        final String left = "#{";
+        // 占位符的右半边
+        final String right = "}";
+        // 子串的起始位置
+        int begin;
+        // 子串的最终位置
+        int end;
+        // 开始查询字符串的位置
+        int fromIndex = 0;
+        // 记录占位符出现的次序
+        int i = 1;
         while (true) {
-            begin = prototypeSql.indexOf(LEFT, fromIndex) + 2;// 找到"#{"字符串后的第一个字符索引
-            end = prototypeSql.indexOf(RIGHT, fromIndex);// 找到"}"字符的索引
-            if (end <= 0) break;// 未找到则退出
+            // 找到"#{"字符串后的第一个字符索引
+            begin = prototypeSql.indexOf(left, fromIndex) + 2;
+            // 找到"}"字符的索引
+            end = prototypeSql.indexOf(right, fromIndex);
+            // 未找到则退出
+            if (end <= 0) {
+                break;
+            }
 
-            field.put(i++, prototypeSql.substring(begin, end));// 截取begin和end直接的字符串
-            fromIndex = end + 1;// 将开始查询的位置设置为"}"字符后的第一个字符索引
+            // 截取begin和end直接的字符串
+            field.put(i++, prototypeSql.substring(begin, end));
+            // 将开始查询的位置设置为"}"字符后的第一个字符索引
+            fromIndex = end + 1;
         }
         return field;
     }

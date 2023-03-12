@@ -1,8 +1,11 @@
 package com.child.util.orm;
 
+import com.child.util.ChildLogger;
+
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 /**
  * 事务管理器，用于管理事务相关操作。<br/>
@@ -14,7 +17,7 @@ import java.sql.SQLException;
  * @version 1.0
  **/
 
-public class JDBCTransaction implements Transaction {
+public class JdbcTransaction implements Transaction {
     /**
      * 数据库连接池。<br/>
      * 每一个事务管理器将持有对应Factory类中对数据库连接池的引用。
@@ -35,7 +38,7 @@ public class JDBCTransaction implements Transaction {
      * <p/>
      * @param dataSource Factory类中数据库连接池对象的引用
      */
-    public JDBCTransaction(DataSource dataSource) {
+    public JdbcTransaction(DataSource dataSource) {
         this(dataSource, false);
     }
 
@@ -45,7 +48,7 @@ public class JDBCTransaction implements Transaction {
      * @param dataSource Factory类中数据库连接池对象的引用
      * @param autoCommit 提交事务的方式，false为手动提交，true为自动提交。
      */
-    public JDBCTransaction(DataSource dataSource, boolean autoCommit) {
+    public JdbcTransaction(DataSource dataSource, boolean autoCommit) {
         this.dataSource = dataSource;
         this.autoCommit = autoCommit;
     }
@@ -57,6 +60,7 @@ public class JDBCTransaction implements Transaction {
     @Override
     public Connection getConnection() throws SQLException {
         openConnection();// 开启连接
+        logger.info("获取连接成功");
         return connection;
     }
 
@@ -66,8 +70,10 @@ public class JDBCTransaction implements Transaction {
      * @throws SQLException 直接向上抛出异常，不作处理
      */
     private void openConnection() throws SQLException {
-        connection = dataSource.getConnection();// 获取全新连接资源
-        connection.setAutoCommit(autoCommit);// 设置连接资源的状态
+        // 获取全新连接资源
+        connection = dataSource.getConnection();
+        // 设置连接资源的状态
+        connection.setAutoCommit(autoCommit);
     }
 
     @Override
@@ -105,4 +111,6 @@ public class JDBCTransaction implements Transaction {
     public void setAutoCommit(boolean autoCommit){
         this.autoCommit = autoCommit;
     }
+
+    public static final Logger logger = ChildLogger.getLogger();
 }

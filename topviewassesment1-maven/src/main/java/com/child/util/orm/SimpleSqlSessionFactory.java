@@ -1,7 +1,10 @@
 package com.child.util.orm;
 
+import com.child.util.ChildLogger;
+
 import javax.sql.DataSource;
 import java.util.Map;
+import java.util.logging.Logger;
 
 
 /**
@@ -25,11 +28,6 @@ public class SimpleSqlSessionFactory implements SqlSessionFactory{
      * 对于每一个SimpleSqlSession实例都将获得该SQL映射集合的可读权限。
      */
     private final Map<String, MapperStatement> statementMap;
-    /**
-     * 对每一个线程将绑定一个SqlSession实现类。
-     * 同一线程仅能持有一个会话类。
-     */
-    private final ThreadLocal<SqlSession> threadLocal = new ThreadLocal<>();
 
     /**
      * 用于创建一个SimpleSqlSessionFactory实例，
@@ -61,18 +59,16 @@ public class SimpleSqlSessionFactory implements SqlSessionFactory{
     @Override
     public SqlSession openSession(boolean autoCommit) {
 
-        // 从线程资源绑定器中尝试获取会话资源
-        SqlSession sqlSession = threadLocal.get();
-        // 如果存在会话资源，则直接返回
-        if (sqlSession != null) return sqlSession;
         // 创建一个全新的事务管理器
-        Transaction transaction = new JDBCTransaction(dataSource, autoCommit);
+        Transaction transaction = new JdbcTransaction(dataSource, autoCommit);
 
         // 创建会话类，直接将工厂类中的事务管理器和SQL映射集合传入即可。
-        sqlSession = new SimpleSqlSession(transaction, statementMap);
-        threadLocal.set(sqlSession);// 会话资源与线程绑定
+        SqlSession sqlSession = new SimpleSqlSession(transaction, statementMap);
 
-        return sqlSession;// 最后返回会话资源
+        logger.info("开启会话成功");
+        // 最后返回会话资源
+        return sqlSession;
     }
 
+    private static final Logger logger = ChildLogger.getLogger();
 }

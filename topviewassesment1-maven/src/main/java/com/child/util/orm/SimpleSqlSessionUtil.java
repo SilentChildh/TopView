@@ -1,6 +1,7 @@
 package com.child.util.orm;
 
 import com.child.util.ChildDataSource;
+import com.child.util.ChildLogger;
 import org.xml.sax.SAXException;
 
 import javax.sql.DataSource;
@@ -11,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -62,7 +64,9 @@ public class SimpleSqlSessionUtil {
                 new SimpleSqlSessionFactory(childDataSource, mapperStatementMap);
         // 将工厂类放入sqlSessionFactoryMap集合中统一管理
         SQL_SESSION_FACTORY_MAP.put(resource, simpleSqlSessionFactory);
-        return simpleSqlSessionFactory;// 返回一个工厂类
+        logger.info("创建会话工厂成功");
+        // 返回一个工厂类
+        return simpleSqlSessionFactory;
     }
 
     /**
@@ -98,7 +102,9 @@ public class SimpleSqlSessionUtil {
         // 尝试从sqlSessionFactoryMap集合中获取工厂类
         SqlSessionFactory sqlSessionFactory = SQL_SESSION_FACTORY_MAP.get(resource);
         // 如果不存在该工厂类，那么就build一个出来
-        if (sqlSessionFactory == null) sqlSessionFactory = build(resource);
+        if (sqlSessionFactory == null) {
+            sqlSessionFactory = build(resource);
+        }
         // 通过指定工厂获取会话资源并返回
         return sqlSessionFactory.openSession(autoCommit);
     }
@@ -113,7 +119,9 @@ public class SimpleSqlSessionUtil {
      * K为全限定id，V为SQL映射对象。
      */
     public static Map<String, MapperStatement> getStatementMapperFromPackage(String packageName) {
-        Map<String, MapperStatement> mapperStatementMap = new HashMap<>();// 用于接收SQL映射对象
+        // 用于接收SQL映射对象
+        // noinspection AlibabaCollectionInitShouldAssignCapacity
+        Map<String, MapperStatement> mapperStatementMap = new HashMap<>();
         try {
 
             // 获取指定包下的所有文件的URL
@@ -123,9 +131,12 @@ public class SimpleSqlSessionUtil {
                     .getResources(packageName.replace('.', '/'));
             // 遍历每一个URL
             while (resources.hasMoreElements()) {
-                URL url = resources.nextElement();// 获取URL
-                String protocol = url.getProtocol();// 获取协议
-                if (FILE.equals(protocol)) {// 如何满足协议，则进行解析，并将解析后的元素合并到集合中
+                // 获取URL
+                URL url = resources.nextElement();
+                // 获取协议
+                String protocol = url.getProtocol();
+                // 如果满足协议，则进行解析，并将解析后的元素合并到集合中
+                if (FILE.equals(protocol)) {
                     mapperStatementMap.putAll(getStatementMapperFromDirectory(url.getPath()));
                 }
             }
@@ -134,6 +145,7 @@ public class SimpleSqlSessionUtil {
             throw new RuntimeException("通过包名获取SQL映射集合失败\n" + e.getMessage());
         }
         // 最后返回解析后的SQL映射对象
+        logger.info("通过包名获取SQL映射集合成功");
         return mapperStatementMap;
     }
 
@@ -151,14 +163,20 @@ public class SimpleSqlSessionUtil {
      * K为SQL的全限定id，V为SQL映射对象
      */
     private static Map<String, MapperStatement> getStatementMapperFromDirectory(String directoryName) {
-        Map<String, MapperStatement> mapperStatementMap = new HashMap<>();// 用于接收SQL映射对象
-        File file = new File(directoryName);// 根据目录创建文件
+        // 用于接收SQL映射对象
+        // noinspection AlibabaCollectionInitShouldAssignCapacity
+        Map<String, MapperStatement> mapperStatementMap = new HashMap<>();
+        // 根据目录创建文件
+        File file = new File(directoryName);
         // 如果不存在该目录则直接返回一个空的Map
-        if (!file.isDirectory() || !file.exists()) return mapperStatementMap;
+        if (!file.isDirectory() || !file.exists()) {
+            return mapperStatementMap;
+        }
 
         // 获取目录下的所有".xml"结尾的文件
         File[] files = file.listFiles(fileName -> {
-            if (fileName.isDirectory()) {// 如果存在子目录则继续搜索
+            // 如果存在子目录则继续搜索
+            if (fileName.isDirectory()) {
                 getStatementMapperFromDirectory(fileName.getAbsolutePath());
             }
             // 如果不是的话则直接返回后缀为".xml"的文件
@@ -167,7 +185,9 @@ public class SimpleSqlSessionUtil {
         });
 
         // 如果不存在".xml"结尾的文件则直接返回一个空Map
-        if (files == null) return mapperStatementMap;
+        if (files == null) {
+            return mapperStatementMap;
+        }
 
         /*接下来开始对所有".xml"文件进行解析*/
         try {
@@ -177,8 +197,7 @@ public class SimpleSqlSessionUtil {
             SAXParser saxParser = saxParserFactory.newSAXParser();
             // 获取解析器处理器
             ParseMapperHandler parseMapperHandler = new ParseMapperHandler();
-
-            return Arrays.stream(files).parallel()
+            Map<String, MapperStatement> collect = Arrays.stream(files).parallel()
                     // 将流中的.xml文件进行解析，返回SQL映射集合的K-V条目
                     .map(x -> {
                         try {
@@ -186,19 +205,22 @@ public class SimpleSqlSessionUtil {
                             // 返回K-V条目回到流中
                             return parseMapperHandler.getStatementMapper().entrySet();
                         } catch (SAXException | IOException e) {
-                            throw new RuntimeException("解析Mapper.xml文件失败\n"  +e.getMessage());
+                            throw new RuntimeException("解析Mapper.xml文件失败\n" + e.getMessage());
                         }
                     })
                     // 将Set<Entry<String, String>>一对多映射为Entry<String, String>，即从Set集合中取出元素
                     .flatMap(Set::stream)
                     // 最后通过线程安全的终结管道操作，将流中元素包装进Map集合中进行返回
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            logger.info("通过目录路径解析Mapper.xml文件成功");
+            return collect;
 
         } catch (ParserConfigurationException | SAXException e) {
             throw new RuntimeException("通过目录路径解析Mapper.xml文件失败\n"  +e.getMessage());
         }
 
     }
+    private static final Logger logger = ChildLogger.getLogger();
 
     /**
      * 默认数据库连接池配置地址，即数据库环境地址。

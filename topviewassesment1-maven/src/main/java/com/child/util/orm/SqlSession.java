@@ -15,41 +15,72 @@ import java.util.List;
 public interface SqlSession extends AutoCloseable {
     /**
      * 用于关闭会话。
+     *
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
     void close() throws SQLException;
 
     /**
      * 提交事务。
+     *
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
     void commit() throws SQLException;
 
     /**
      * 回滚事务。
+     *
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
     void rollback() throws SQLException;
 
     /**
      * 用于插入parameters对象记录，返回受影响行数。
+     *
+     * @param sqlId      sql id
+     * @param parameters 参数
+     * @return int 返回受影响行数。
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
     int insert(String sqlId, Object parameters) throws SQLException;
 
     /**
      * 用于删除parameters对象记录，返回受影响行数。
+     *
+     * @param sqlId      sql id
+     * @param parameters 参数
+     * @return int 返回受影响行数。
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
     int delete(String sqlId, Object parameters) throws SQLException;
 
     /**
      * 用于更新parameters对象记录，返回受影响行数。
+     *
+     * @param sqlId      sql id
+     * @param parameters 参数
+     * @return int 返回受影响行数。
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
     int update(String sqlId, Object parameters) throws SQLException;
 
     /**
      * 用于插入parameters对象记录，返回查询得到的对象。
+     *
+     * @param sqlId      sql id
+     * @param parameters 参数
+     * @return {@link T} 指定返回值类型的对象
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
     <T> T selectOne(String sqlId, Object parameters) throws SQLException;
 
     /**
      * 用于插入parameters对象记录，返回查询得到的所有对象。
+     *
+     * @param sqlId      sql id
+     * @param parameters 参数
+     * @return {@link List}<{@link E}> 返回包含指定返回值类型的元素的集合
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
     <E> List<E> selectList(String sqlId, Object parameters) throws SQLException;
 }

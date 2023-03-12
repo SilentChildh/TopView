@@ -1,10 +1,15 @@
 package com.child.util.orm;
 
+import com.child.util.ChildDataSource;
+import com.child.util.ChildLogger;
+import com.mysql.cj.log.Log;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.sql.*;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * 该sql会话主要用于对数据库进行一系列的操作。集成了操作数据库必要的功能。<br/>
@@ -124,20 +129,25 @@ public class SimpleSqlSession implements SqlSession {
      */
     @Override
     public int update(String sqlId, Object parameters) throws SQLException {
-        openConnection();// 开启连接资源
-        setSqlHandler(parameters);// 设置SQL处理器
+        // 开启连接资源
+        openConnection();
+        // 设置SQL处理器
+        setSqlHandler(parameters);
 
         // 根据全限定id，即statement获取对应的SQL映射对象
         MapperStatement mapperStatement = statementMap.get(sqlId);
         // 获取对应的原生SQL语句
         String prototypeSql = mapperStatement.getPrototypeSql();
 
-        // 获取可以立即执行的preparedStatement实例
-        // try-with-resources自动关闭资源
+        /*获取可以立即执行的preparedStatement实例,
+          try-with-resources自动关闭资源
+         */
         try (PreparedStatement preparedStatement =
                      sqlHandler.sqlHandler(connection, prototypeSql, parameters)) {
-
-            return preparedStatement.executeUpdate();// 执行sql语句, 并返回受影响行数
+            int rowCount = preparedStatement.executeUpdate();
+            logger.info("记录更新成功");
+            // 执行sql语句, 并返回受影响行数
+            return rowCount;
         }
     }
 
@@ -156,11 +166,20 @@ public class SimpleSqlSession implements SqlSession {
      */
     @Override
     public <T> T selectOne(String sqlId, Object parameters) throws SQLException {
-        List<Object> objects = selectList(sqlId, parameters);// 接收结果集合
-        if (objects.size() == 0) return null;// 如果为0直接返回null
-        else if (objects.size() > 1) throw new RuntimeException("查询记录不唯一");
-
-        return (T) objects.get(0);
+        // 接收结果集合
+        List<Object> objects = selectList(sqlId, parameters);
+        if (objects.size() == 0) {
+            logger.info("查询记录不存在");
+            // 如果为0直接返回null
+            return null;
+        }
+        else if (objects.size() > 1) {
+            logger.info("查询记录不唯一");
+            throw new RuntimeException("查询记录不唯一");
+        }
+        T t = (T) objects.get(0);
+        logger.info("查询唯一记录成功");
+        return t;
     }
 
 
@@ -176,12 +195,15 @@ public class SimpleSqlSession implements SqlSession {
      */
     @Override
     public <E> List<E> selectList(String sqlId, Object parameters) throws SQLException {
-        MapperStatement mapperStatement = statementMap.get(sqlId);// 获取SQL映射对象
-        String resultType = mapperStatement.getResultType();// 获取SQL返回值类型
+        // 获取SQL映射对象
+        MapperStatement mapperStatement = statementMap.get(sqlId);
+        // 获取SQL返回值类型
+        String resultType = mapperStatement.getResultType();
 
         try {
-            Class<?> aClass = Class.forName(resultType);// 创建对应返回值类型的Class对象
-            return selectList(sqlId, parameters, new ListResultHandler<>(aClass));// 调用
+            // 创建对应返回值类型的Class对象
+            Class<?> aClass = Class.forName(resultType);
+            return selectList(sqlId, parameters, new ListResultHandler<>(aClass));
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("创建class对象失败\n" + e.getMessage());
         }
@@ -200,45 +222,59 @@ public class SimpleSqlSession implements SqlSession {
      * @throws SQLException 直接向上抛出
      */
     public <E> List<E> selectList(String sqlId, Object parameters, ResultHandler<?> resultHandler) throws SQLException {
-        openConnection();// 开启连接
-        setSqlHandler(parameters);// 设置SQL处理器
+        // 开启连接
+        openConnection();
+        // 设置SQL处理器
+        setSqlHandler(parameters);
 
-        MapperStatement mapperStatement = statementMap.get(sqlId);// 获取SQL映射对象
-        String prototypeSql = mapperStatement.getPrototypeSql();// 获取原始SQL
+        // 获取SQL映射对象
+        MapperStatement mapperStatement = statementMap.get(sqlId);
+        // 获取原始SQL
+        String prototypeSql = mapperStatement.getPrototypeSql();
 
         // 获取preparedStatement实例，并自动关闭
         try (PreparedStatement preparedStatement =
                      sqlHandler.sqlHandler(connection, prototypeSql, parameters)) {
-            ResultSet resultSet = preparedStatement.executeQuery();// 获取结果集
-
-            return (List<E>) resultHandler.handler(resultSet);
+            // 获取结果集
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<E> res = (List<E>) resultHandler.handler(resultSet);
+            logger.info("查询指定记录成功");
+            return res;
         }
 
     }
 
     /**
+     * 打开连接
      * 私有方法，用于本类确保在对数据库进行操作时，都能打开连接资源。<br/>
      *
      * @throws SQLException 直接向上抛出异常不做处理
      */
     private void openConnection() throws SQLException {
+
         if (connection == null) {
             connection = transaction.getConnection();
+            logger.info("开启连接成功");
         }
+        logger.info("连接已存在");
     }
 
     /**
+     * 设置sql处理程序
      * 用于设置SQL处理器，当传入的单参为Map类型及其子类时，使用{@link MapSqlHandler}，
      * 否则使用{@link ObjectSqlHandler}.<br/>
      * <p/>
      * 该方法应当在每次进行CRUD操作前被调用。<br/>
+     *
      * @param arg 传入的单实参
      */
     private void setSqlHandler(Object arg) {
         // 如果传入的参数类型为Map则设置Map类型的SQL处理器，否则使用Object类型
         this.sqlHandler =
                 arg instanceof Map ? new MapSqlHandler() : new ObjectSqlHandler();
+        logger.info("SQL处理设置成功");
     }
 
+    private static final Logger logger = ChildLogger.getLogger();
 
 }

@@ -16,22 +16,34 @@ import java.sql.SQLException;
 
 public interface Transaction {
     /**
+     * 获得连接。<br/>
      * 通过调用{@code openConnection()}方法来开启资源，再返回获取得到的连接资源
+     *
+     * @return {@link Connection} 返回一个连接
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
     Connection getConnection() throws SQLException;
 
     /**
+     * 关闭
      * 用于关闭连接资源
+     *
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
     void close() throws SQLException;
 
     /**
+     * 提交
      * 用于提交事务
+     *
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
     void commit() throws SQLException;
 
     /**
      * 用于回滚事务
+     *
+     * @throws SQLException sqlexception异常，直接向上抛出
      */
     void rollback() throws SQLException;
 

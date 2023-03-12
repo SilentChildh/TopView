@@ -5,9 +5,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * SQL语句处理器，适用于传入的实参为pojo类的场景。<br/>
@@ -34,23 +32,27 @@ public class ObjectSqlHandler implements SqlHandler<Object>{
     @Override
     public PreparedStatement sqlHandler(Connection connection, String prototypeSql,
                                         Object parameters) throws SQLException {
-        Class<?> parametersClass = parameters.getClass();// 获取parameters的运行类型
+        // 获取parameters的运行类型
+        Class<?> parametersClass = parameters.getClass();
 
         /*接下来开始解析原生sql为符合JDBC规范的sql语句*/
-        String sql = this.parsePrototypeSql(prototypeSql);// 调用接口的默认方法
+        // 调用接口的默认方法
+        String sql = this.parsePrototypeSql(prototypeSql);
 
         /*接下来解析原生sql中相关占位符中的对象属性信息保存在Map集合中*/
-        Map<Integer, String> field = this.fieldMap(prototypeSql);// 调用接口的默认方法
+        // 调用接口的默认方法
+        Map<Integer, String> field = this.fieldMap(prototypeSql);
 
 
         /*将解析好的sql结合先前解析得到的Map集合为占位符"?"进行赋值*/
-        final String GET = "get";// 用于拼接po类获取字段值的方法名
+        // 用于拼接po类获取字段值的方法名
+        final String get = "get";
         // 创建preparedStatement实例
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         // 遍历，通过反射为每一个占位"?"进行赋值
         field.forEach((index, fieldName) -> {
             // 每一个占位符中的字段的get方法名
-            String getMethodName = GET + (char) (fieldName.charAt(0) - 32) + fieldName.substring(1);
+            String getMethodName = get + (char) (fieldName.charAt(0) - 32) + fieldName.substring(1);
             try {
                 // 通过反射获取get方法
                 Method getMethod = parametersClass.getDeclaredMethod(getMethodName);

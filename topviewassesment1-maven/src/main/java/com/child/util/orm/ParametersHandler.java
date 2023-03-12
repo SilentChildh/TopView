@@ -24,13 +24,16 @@ public class ParametersHandler {
      * @return {@link Object}, 但实际上有可能是 {@code Map<String, Object>} 或者 其他pojo实例
      */
     public static Object handle(Method method, Object[] args) {
-        //用于存储原Map集合元素或者被注解修饰的参数。
+        // 用于存储原Map集合元素或者被注解修饰的参数。
+        // noinspection AlibabaCollectionInitShouldAssignCapacity
         final Map<String, Object> parametersMap = new HashMap<>();
         // 获取方法形参的数据
         Parameter[] parameters = method.getParameters();
 
         // 特判无参或者只有一个实参且无注解修饰时的情况
-        if (parameters.length == 0 || (!parameters[0].isAnnotationPresent(PARAM_ANNOTATION) && parameters.length == 1)) {
+        boolean noneParameter = parameters.length == 0;
+        boolean singleParameter = (!parameters[0].isAnnotationPresent(PARAM_ANNOTATION) && parameters.length == 1);
+        if (noneParameter || singleParameter) {
             return args[0];
         }
         // 否则进行是否带有的注解判断

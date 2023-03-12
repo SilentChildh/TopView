@@ -68,16 +68,26 @@ public class ParseMapperHandler extends DefaultHandler {
     public void startElement(String uri, String localName, String qName, Attributes attributes) {
 
         // 匹配mapper标签，将标签内属性namespace，赋值给本类的私有属性namespace
-        if (QualifiedName.MAPPER.equals(qName)) namespace = attributes.getValue(QualifiedName.NAMESPACE).trim();
+        if (QualifiedName.MAPPER.equals(qName)) {
+            namespace = attributes.getValue(QualifiedName.NAMESPACE).trim();
+        }
         else {
             // 每得到一个新的CRUD标签就新建一个映射对象
             mapperStatement = new MapperStatement();
 
             // 接下来四条语句为映射对象中的sqlType进行赋值
-            if (QualifiedName.INSERT.equals(qName)) mapperStatement.setSqlType(QualifiedName.INSERT);
-            else if (QualifiedName.UPDATE.equals(qName)) mapperStatement.setSqlType(QualifiedName.UPDATE);
-            else if (QualifiedName.DELETE.equals(qName)) mapperStatement.setSqlType(QualifiedName.DELETE);
-            else if (QualifiedName.SELECT.equals(qName)) mapperStatement.setSqlType(QualifiedName.SELECT);
+            if (QualifiedName.INSERT.equals(qName)) {
+                mapperStatement.setSqlType(QualifiedName.INSERT);
+            }
+            else if (QualifiedName.UPDATE.equals(qName)) {
+                mapperStatement.setSqlType(QualifiedName.UPDATE);
+            }
+            else if (QualifiedName.DELETE.equals(qName)) {
+                mapperStatement.setSqlType(QualifiedName.DELETE);
+            }
+            else if (QualifiedName.SELECT.equals(qName)) {
+                mapperStatement.setSqlType(QualifiedName.SELECT);
+            }
             // 获取标签内属性id，与namespace进行拼接得到sql语句的映射位置,并且给映射对象中的sqlId赋值
             String sqlId = namespace + '.' + attributes.getValue(QualifiedName.ID).trim();
             mapperStatement.setSqlId(sqlId);
@@ -127,7 +137,9 @@ public class ParseMapperHandler extends DefaultHandler {
         // 为映射对象中的prototypeSql赋值，即赋值xml文件中的原生sql语句
         String value = new String(ch, start, length).trim();
         // 如果不为null，说明此时已经进入CRUD标签内
-        if (mapperStatement != null) mapperStatement.setPrototypeSql(value);
+        if (mapperStatement != null) {
+            mapperStatement.setPrototypeSql(value);
+        }
     }
 
     static class QualifiedName {
