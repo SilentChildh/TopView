@@ -1272,6 +1272,14 @@ public class MapSqlHandler implements SqlHandler {
 
 
 
+
+
+# 2023.3.13
+
+解决2023.3.11的问题，实现了DAO接口的实现类的代理类
+
+
+
 # 框架关系
 
 <img src="./简易orm关系.png" style="zoom:50%;" />
@@ -1293,16 +1301,18 @@ public class MapSqlHandler implements SqlHandler {
     1. 使用工具类的`openSession()`将会自动开启数据库的连接，将会简化开发流程，但是会增加连接池的压力
 
 2. 通过会话工厂类可以开启一段会话，即创建一个会话类
+
 3. 通过会话可以对数据库进行操作，例如：提交事务、回滚事务、关闭连接、CRUD操作
 
     1. 需要注意的是，每次对数据库操作之前应该调用`openConnection()`方法。
 
 4. 编写DAO层接口时，对于方法的形参，您有三种选择，一是传入一个pojo，二是传入一个Map，三是传入多参数，但是每个参数上都必须用注解`@Param`进行修饰。
-5. 在编写DAOImpl实现类时，内部主要有三个操作
 
-    1. 获取会话类，得到操作CRUD的接口
-    2. 将参数进行处理
-    3. 利用会话类和处理好的参数执行CRUD操作
+5. ~~在编写DAOImpl实现类时，内部主要有三个操作~~
+
+    1. ~~获取会话类，得到操作CRUD的接口~~
+    2. ~~将参数进行处理~~
+    3. ~~利用会话类和处理好的参数执行CRUD操作~~
 
     ~~~java
     public class UserDAOImpl implements UserDAO{
@@ -1328,7 +1338,63 @@ public class MapSqlHandler implements SqlHandler {
     </mapper>
     ~~~
 
-    
+6. 现在你可以使用DAO接口实现类的代理类来代替编写重复且繁杂的实现类
+
+    1. 你只需要简单的编写一个DAO的实现类即可，无需编写方法体内的代码。如：
+
+        ~~~java
+        public class UserDAOImpl implements UserDAO{
+            public static final Class<UserDAO> USERDAO_CLASS = UserDAO.class;
+            @Override
+            public int insert(UserPO userPO) throws SQLException {
+                return 0;
+            }
+        }
+        ~~~
+
+    2. 此后，当您需要一个实现类的时候，你应该创建一个通用的工厂类`DAOImplFactory`。该工厂类将会提供您所需要实现类。
+
+        1. 具体操作：
+            1. 创建一个工厂类，然后调用`getDAOImplProxy()`方法，并传入您所需的实现类的class对象
+            2. 需要注意的是，您应该使用对应的DAO接口来接收，而不是使用实现类来接收，否则会抛出异常
+            3. 获取到对应的实现类代理类后，您就可以正常的进行数据库操作了
+
+        2. 使用示例如下：
+
+        ~~~java
+        class DAOImplFactoryTest {
+            private final Logger logger = ChildLogger.getLogger();
+        
+            @Test
+            void getDAOImplProxy() throws SQLException {
+                // 执行查询
+                UserDAO daoImplProxy = new DAOImplFactory().getDAOImplProxy(UserDAOImpl.class);
+                List<Object> list = daoImplProxy.selectByName("李四");
+                // 断言以及打印日志
+                Assertions.assertNotNull(list);
+                logger.info(list.toString());
+            }
+        
+            @Test
+            void testInsertAndUpdate() throws SQLException {
+                // 用于操作事务
+                SqlSession sqlSession = SimpleSqlSessionUtil.openSession();
+                // 执行操作
+                UserDAO daoImplProxy = new DAOImplFactory().getDAOImplProxy(UserDAOImpl.class);
+                UserPO userPO = new UserPO(null, "张三", "@qq.com", "CN", "GTR");
+                int insert = daoImplProxy.insert(userPO);
+                int i = daoImplProxy.updateById(246L, "樱花", "马车");
+                // 断言
+                Assertions.assertNotEquals(0, insert);
+                // 提交以及关闭
+                sqlSession.commit();
+                sqlSession.close();
+            }
+        }
+        ~~~
+
+        
+
 
 
 
