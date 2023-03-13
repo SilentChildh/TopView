@@ -9,6 +9,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * DAO层实现类的代理工厂。<br/>
+ * <p/>
+ * 可以通过{@code getDAOImplProxy(Class)}方法获取对应的DAO接口实现类。<br/>
+ * 对于利用该工厂类获取的实现类，实际上并不会调用实现类的方法，而是调用工厂类的算法。
+ * 该工常类需要的是实现类的相关信息，并不需要它们方法体内的算法。<br/>
+ * 故实现类中可以不用编写方法体内的内容。</>
+ *
+ * @author silent_child
+ * @version 1.0.0
+ * @date 2023/03/13
+ */
 public class DAOImplFactory implements InvocationHandler {
     /**
      * 注解{@link Param}的类对象，将用于判断是否存在该注解。
@@ -19,10 +31,6 @@ public class DAOImplFactory implements InvocationHandler {
      * 对应DAO实现类的class对象
      */
     public Class<?> implClazz;
-    /**
-     * 利用class对象创建的实例
-     */
-    private Object impl;
 
     /**
      * 获取对应DAO接口的实现类的代理类。<br/>
@@ -35,9 +43,8 @@ public class DAOImplFactory implements InvocationHandler {
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    public <T> T getDAOImplProxy(Class<? extends T> implClazz) throws InstantiationException, IllegalAccessException {
+    public <T> T getDAOImplProxy(Class<? extends T> implClazz) {
         this.implClazz = implClazz;
-        this.impl = implClazz.newInstance();
         return (T) Proxy.newProxyInstance(implClazz.getClassLoader(), implClazz.getInterfaces(),this);
     }
 
