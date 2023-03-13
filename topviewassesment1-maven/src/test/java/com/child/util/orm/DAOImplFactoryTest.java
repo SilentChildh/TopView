@@ -4,6 +4,8 @@ import com.child.dao.UserDAO;
 import com.child.dao.UserDAOImpl;
 import com.child.pojo.UserPO;
 import com.child.util.ChildLogger;
+import com.child.util.orm.util.DAOImplFactory;
+import com.child.util.orm.util.SimpleSqlSessionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -2,6 +2,7 @@ package com.child.util.orm;
 
 import com.child.util.ChildDataSource;
 import com.child.util.ChildLogger;
+import com.child.util.orm.bean.MapperStatement;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -9,10 +10,7 @@ import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SimpleSqlSessionFactoryTest {
     private static final DataSource DATASOURCE = ChildDataSource.creatDataSource("default-config");

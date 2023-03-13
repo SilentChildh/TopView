@@ -1,7 +1,7 @@
 package com.child.dao;
 
 import com.child.pojo.UserPO;
-import com.child.util.orm.Param;
+import com.child.util.orm.annotation.Param;
 
 import java.sql.SQLException;
 import java.util.List;

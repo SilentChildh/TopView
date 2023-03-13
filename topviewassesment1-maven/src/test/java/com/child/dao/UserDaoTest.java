@@ -3,7 +3,7 @@ package com.child.dao;
 import com.child.pojo.UserPO;
 import com.child.util.ChildLogger;
 import com.child.util.orm.SqlSession;
-import com.child.util.orm.SimpleSqlSessionUtil;
+import com.child.util.orm.util.SimpleSqlSessionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

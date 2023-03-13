@@ -1,4 +1,6 @@
-package com.child.util.orm;
+package com.child.util.orm.bean;
+
+import com.child.util.orm.handler.SqlHandler;
 
 import java.sql.Connection;
 

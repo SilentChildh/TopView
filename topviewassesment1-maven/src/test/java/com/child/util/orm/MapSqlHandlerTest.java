@@ -2,6 +2,8 @@ package com.child.util.orm;
 
 import com.child.util.ChildDataSource;
 import com.child.util.ChildLogger;
+import com.child.util.orm.bean.ForPreparedStatement;
+import com.child.util.orm.handler.MapSqlHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -3,6 +3,7 @@ package com.child.util.orm;
 import com.child.pojo.UserPO;
 import com.child.util.ChildDataSource;
 import com.child.util.ChildLogger;
+import com.child.util.orm.bean.MapperStatement;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

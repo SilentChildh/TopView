@@ -2,12 +2,11 @@ package com.child.util.orm;
 
 import com.child.dao.UserDAO;
 import com.child.util.ChildLogger;
+import com.child.util.orm.handler.ParametersHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.logging.Logger;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ParametersHandlerTest {
     private static final Logger logger = ChildLogger.getLogger();

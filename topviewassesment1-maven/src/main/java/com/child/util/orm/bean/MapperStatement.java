@@ -1,4 +1,4 @@
-package com.child.util.orm;
+package com.child.util.orm.bean;
 
 /**
  * 用于保存xml映射文件中的CRUD标签的相关信息。<br/>

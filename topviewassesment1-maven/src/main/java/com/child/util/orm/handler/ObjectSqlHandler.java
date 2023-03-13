@@ -1,4 +1,7 @@
-package com.child.util.orm;
+package com.child.util.orm.handler;
+
+import com.child.util.orm.bean.ForPreparedStatement;
+import com.child.util.orm.handler.SqlHandler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,7 +17,7 @@ import java.util.Map;
  * @version 1.0
  **/
 
-public class ObjectSqlHandler implements SqlHandler<Object>{
+public class ObjectSqlHandler implements SqlHandler<Object> {
 
     /**
      * sql处理程序

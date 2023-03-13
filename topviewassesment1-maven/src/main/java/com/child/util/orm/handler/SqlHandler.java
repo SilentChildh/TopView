@@ -1,4 +1,6 @@
-package com.child.util.orm;
+package com.child.util.orm.handler;
+
+import com.child.util.orm.bean.ForPreparedStatement;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

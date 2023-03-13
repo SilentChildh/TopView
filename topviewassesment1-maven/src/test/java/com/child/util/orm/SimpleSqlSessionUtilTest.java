@@ -1,6 +1,8 @@
 package com.child.util.orm;
 
 import com.child.util.ChildLogger;
+import com.child.util.orm.bean.MapperStatement;
+import com.child.util.orm.util.SimpleSqlSessionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -11,8 +13,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SimpleSqlSessionUtilTest {
     public static final String DEFAULT_CONFIG = "default-config";
