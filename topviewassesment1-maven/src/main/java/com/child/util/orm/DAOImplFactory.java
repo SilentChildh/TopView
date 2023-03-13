@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DAOImplProxy implements InvocationHandler {
+public class DAOImplFactory implements InvocationHandler {
     /**
      * 注解{@link Param}的类对象，将用于判断是否存在该注解。
      */
