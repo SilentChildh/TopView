@@ -15,7 +15,7 @@ class DAOImplFactoryTest {
     private final Logger logger = ChildLogger.getLogger();
 
     @Test
-    void getDAOImplProxy() throws InstantiationException, IllegalAccessException, SQLException {
+    void getDAOImplProxy() throws SQLException {
         // 执行查询
         UserDAO daoImplProxy = new DAOImplFactory().getDAOImplProxy(UserDAOImpl.class);
         List<Object> list = daoImplProxy.selectByName("李四");
@@ -25,7 +25,7 @@ class DAOImplFactoryTest {
     }
 
     @Test
-    void testInsertAndUpdate() throws InstantiationException, IllegalAccessException, SQLException {
+    void testInsertAndUpdate() throws SQLException {
         // 用于操作事务
         SqlSession sqlSession = SimpleSqlSessionUtil.openSession();
         // 执行操作
