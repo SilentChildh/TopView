@@ -1,7 +1,8 @@
 package com.child.util.xml;
 
 import com.child.util.ChildLogger;
-import com.child.util.orm.bean.MapperStatement;
+import com.child.util.ioc.bean.MetaBean;
+import com.child.util.orm.bean.MetaMapperStatement;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -88,10 +89,7 @@ public class ParseXmlUtils {
 
         // 获取目录下的所有".xml"结尾的文件和子目录
         File[] files =
-                currentFile.listFiles(file -> {
-                    boolean b = file.getName().endsWith(".xml");
-                    return b;
-                });
+                currentFile.listFiles(file -> file.getName().endsWith(".xml"));
 
         // 如果不存在文件，返回一个空list
         if (files == null) {
@@ -123,10 +121,10 @@ public class ParseXmlUtils {
      * 其中核心部分为：
      * 解析处理器{@link ParseMapperHandler}帮助完成了将xml中的sql映射放置到Map集合中。<br/>
      *
-     * @param files 文件
-     * @return {@link Map}<{@link String}, {@link MapperStatement}>
+     * @param files 文件集合
+     * @return {@link Map}<{@link String}, {@link MetaMapperStatement}> K为全限定id，V为SQL映射对象
      */
-    public static Map<String, MapperStatement> parseMapper(List<File> files) {
+    public static Map<String, MetaMapperStatement> parseMapper(List<File> files) {
         try {
             // 获取解析器工厂
             SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
@@ -135,7 +133,7 @@ public class ParseXmlUtils {
             // 获取解析器处理器
             ParseMapperHandler parseMapperHandler = new ParseMapperHandler();
 
-            Map<String, MapperStatement> collect = files.stream()
+            Map<String, MetaMapperStatement> collect = files.stream()
                     // 将流中的.xml文件进行解析，返回SQL映射集合的K-V条目
                     .map(x -> {
                         try {
@@ -157,6 +155,50 @@ public class ParseXmlUtils {
 
         } catch (ParserConfigurationException | SAXException e) {
             throw new RuntimeException("解析Mapper.xml文件失败\n"  +e.getMessage());
+        }
+    }
+
+    /**
+     * 解析Mapper.xml文件，用于获取bean实例。<br/>
+     * <p/>
+     * 根据目录名可以获取该目录下的所有xml文件，通过包名可以获取进一步解析子目录。<br/>
+     * 其中核心部分为：
+     * 解析处理器{@link ParseMapperHandler}帮助完成了将xml中的bean放置到Map集合中。<br/>
+     *
+     * @param files 文件集合
+     * @return {@link Map}<{@link String}, {@link MetaBean}> K为全限定id，V为bean对象元信息
+     */
+    public static Map<String, MetaBean> parseBean(List<File> files) {
+        try {
+            // 获取解析器工厂
+            SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+            // 获取解析器
+            SAXParser saxParser = saxParserFactory.newSAXParser();
+            // 获取解析器处理器
+            ParseBeanHandler parseBeanHandler = new ParseBeanHandler();
+
+            Map<String, MetaBean> collect = files.stream()
+                    // 将流中的.xml文件进行解析，返回SQL映射集合的K-V条目
+                    .map(x -> {
+                        try {
+                            saxParser.parse(x, parseBeanHandler);
+                            // 返回K-V条目回到流中
+                            return parseBeanHandler.getMetaBeanMap().entrySet();
+                        } catch (SAXException | IOException e) {
+                            logger.info("Bean.xml文件失败\n" + e.getMessage());
+                            throw new RuntimeException("Bean.xml文件失败\n" + e.getMessage());
+                        }
+                    })
+                    // 将Set<Entry<String, String>>一对多映射为Entry<String, String>，即从Set集合中取出元素
+                    .flatMap(Set::stream)
+                    // 最后通过线程安全的终结管道操作，将流中元素包装进Map集合中进行返回
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (entity1, entity2) -> entity1));
+
+            logger.info("Bean.xml文件成功");
+            return collect;
+
+        } catch (ParserConfigurationException | SAXException e) {
+            throw new RuntimeException("Bean.xml文件失败\n"  +e.getMessage());
         }
     }
 }
