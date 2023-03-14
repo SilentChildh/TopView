@@ -15,7 +15,14 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ParseXMLUtils {
+/**
+ * 解析XML文件的工具类。<br/>
+ *
+ * @author silent_child
+ * @version 1.0.0
+ * @date 2023/03/14
+ */
+public class ParseXmlUtils {
     private static final Logger logger = ChildLogger.getLogger();
     /**
      * 通过指定包名获取包下所有“.xml”为后缀的文件<br/>
@@ -25,7 +32,7 @@ public class ParseXMLUtils {
      * @param packageName 指定包名，包下含有xml文件
      * @return {@link List}<{@link File}> 返回指定包下的所有xml文件集合
      */
-    public static List<File> getXMLFileFromPackage(String packageName) {
+    public static List<File> getXmlFileFromPackage(String packageName) {
         final String file = "file";
         try {
             // 获取指定包下的所有文件的URL
@@ -42,7 +49,7 @@ public class ParseXMLUtils {
                 String protocol = url.getProtocol();
                 // 如果满足协议，则进行解析，并将解析后的元素合并到集合中
                 if (file.equals(protocol)) {
-                    return getXMLFileFromDirectory(url.getPath());
+                    return getXmlFileFromDirectory(url.getPath());
                 }
             }
 
@@ -62,7 +69,7 @@ public class ParseXMLUtils {
      * @param directoryPath 指定包名的目录路径
      * @return {@link List}<{@link File}> 返回指定目录路径下的所有xml文件集合
      */
-    public static List<File> getXMLFileFromDirectory(String directoryPath) {
+    public static List<File> getXmlFileFromDirectory(String directoryPath) {
         // 接收文件的容器
         Stream<File> stream = new ArrayList<File>().stream();
         List<File> list = new ArrayList<>();
@@ -86,15 +93,15 @@ public class ParseXMLUtils {
 
         for (File file : files) {
             // 如果是的xml文件的话则添加到集合中
-            boolean isXML = file.getName().endsWith(".xml");
-            if (isXML){
+            boolean isXml = file.getName().endsWith(".xml");
+            if (isXml){
                 list.add(file);
             }
 
             // 如果是子目录则继续搜索
             if (file.isDirectory()) {
                 // 并将返回结果与原来的stream进行合并
-                stream = Stream.concat(stream, getXMLFileFromDirectory(file.getAbsolutePath()).stream());
+                stream = Stream.concat(stream, getXmlFileFromDirectory(file.getAbsolutePath()).stream());
             }
 
         }

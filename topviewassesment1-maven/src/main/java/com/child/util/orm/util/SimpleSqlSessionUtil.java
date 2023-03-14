@@ -6,7 +6,7 @@ import com.child.util.orm.SimpleSqlSessionFactory;
 import com.child.util.orm.SqlSession;
 import com.child.util.orm.SqlSessionFactory;
 import com.child.util.orm.bean.MapperStatement;
-import com.child.util.xml.ParseXMLUtils;
+import com.child.util.xml.ParseXmlUtils;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -129,10 +129,10 @@ public class SimpleSqlSessionUtil {
         Map<String, MapperStatement> mapperStatementMap = new HashMap<>();
 
         // 获取XML文件
-        List<File> xmlFiles = ParseXMLUtils.getXMLFileFromPackage(packageName);
+        List<File> xmlFiles = ParseXmlUtils.getXmlFileFromPackage(packageName);
 
         // 解析XML文件，并返回
-        return ParseXMLUtils.parseMapper(xmlFiles);
+        return ParseXmlUtils.parseMapper(xmlFiles);
     }
 
     /**
@@ -149,10 +149,10 @@ public class SimpleSqlSessionUtil {
         Map<String, MapperStatement> mapperStatementMap = new HashMap<>();
 
         // 获取XML文件
-        List<File> xmlFiles = ParseXMLUtils.getXMLFileFromDirectory(directoryPath);
+        List<File> xmlFiles = ParseXmlUtils.getXmlFileFromDirectory(directoryPath);
 
         // 解析XML文件，并返回
-        return ParseXMLUtils.parseMapper(xmlFiles);
+        return ParseXmlUtils.parseMapper(xmlFiles);
 
 
     }
