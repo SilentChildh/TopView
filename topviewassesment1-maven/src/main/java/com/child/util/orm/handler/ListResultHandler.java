@@ -112,6 +112,6 @@ public class ListResultHandler<E> implements ResultHandler<List<E>>{
         logger.info("结果集收集为List集合成功");
         return list;
     }
-    public static final Logger logger = ChildLogger.getLogger();
+    private static final Logger logger = ChildLogger.getLogger();
 
 }

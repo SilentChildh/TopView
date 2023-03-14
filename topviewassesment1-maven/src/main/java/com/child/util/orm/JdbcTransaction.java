@@ -112,5 +112,5 @@ public class JdbcTransaction implements Transaction {
         this.autoCommit = autoCommit;
     }
 
-    public static final Logger logger = ChildLogger.getLogger();
+    private static final Logger logger = ChildLogger.getLogger();
 }

@@ -33,7 +33,7 @@ public class DAOImplFactory implements InvocationHandler {
     /**
      * 对应DAO实现类的class对象
      */
-    public Class<?> implClazz;
+    private Class<?> implClazz;
 
     /**
      * 获取对应DAO接口的实现类的代理类。<br/>
