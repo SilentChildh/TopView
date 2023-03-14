@@ -19,7 +19,7 @@ class DaoImplFactoryTest {
     @Test
     void getDAOImplProxy() throws SQLException {
         // 执行查询
-        UserDAO daoImplProxy = new DaoImplFactory().getDaoImplProxy(UserDAOImpl.class);
+        UserDAO daoImplProxy = new DaoImplFactory().getDaoImplProxy(UserDAO.class);
         List<Object> list = daoImplProxy.selectByName("李四");
         // 断言以及打印日志
         Assertions.assertNotNull(list);
@@ -31,7 +31,7 @@ class DaoImplFactoryTest {
         // 用于操作事务
         SqlSession sqlSession = SimpleSqlSessionUtil.openSession();
         // 执行操作
-        UserDAO daoImplProxy = new DaoImplFactory().getDaoImplProxy(UserDAOImpl.class);
+        UserDAO daoImplProxy = new DaoImplFactory().getDaoImplProxy(UserDAO.class);
         UserPO userPO = new UserPO(null, "张三", "@qq.com", "CN", "GTR");
         int insert = daoImplProxy.insert(userPO);
         int i = daoImplProxy.updateById(246L, "樱花", "马车");
@@ -41,4 +41,16 @@ class DaoImplFactoryTest {
         sqlSession.commit();
         sqlSession.close();
     }
+
+
+    @Test
+    void testSelect() throws SQLException {
+        // 执行查询
+        UserDAO daoImplProxy = new DaoImplFactory().getDaoImplProxy(UserDAO.class);
+        List<Object> list = daoImplProxy.selectByName("李四");
+        // 断言以及打印日志
+        Assertions.assertNotNull(list);
+        logger.info(list.toString());
+    }
+
 }

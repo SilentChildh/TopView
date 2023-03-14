@@ -33,7 +33,7 @@ public class DaoImplFactory implements InvocationHandler {
     /**
      * 对应DAO实现类的class对象
      */
-    public Class<?> implClazz;
+    public Class<?> clazz;
 
     /**
      * 获取对应DAO接口的实现类的代理类。<br/>
@@ -41,13 +41,13 @@ public class DaoImplFactory implements InvocationHandler {
      * 用户再获取代理类时，需要注意的是用DAO接口进行引用接收代理类。<b/>
      * 传入的参数则是对应DAO接口实现类的class对象。<br/>
      *
-     * @param implClazz 对应DAO接口实现类的class对象
+     * @param clazz 对应DAO接口实现类的class对象
      * @return 对应的代理类
      */
     @SuppressWarnings("unchecked")
-    public <T> T getDaoImplProxy(Class<? extends T> implClazz) {
-        this.implClazz = implClazz;
-        return (T) Proxy.newProxyInstance(implClazz.getClassLoader(), implClazz.getInterfaces(),this);
+    public <T> T getDaoImplProxy(Class<T> clazz) {
+        this.clazz = clazz;
+        return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{clazz},this);
     }
 
 
@@ -94,7 +94,7 @@ public class DaoImplFactory implements InvocationHandler {
             object = parametersMap;
         }
 
-        String implName = implClazz.getName();
+        String implName = clazz.getName();
         int index = implName.indexOf("DAO");
         String sqlId = implName.substring(0, index + 3) + '.' + method.getName();
         Class<?> returnType = method.getReturnType();
