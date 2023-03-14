@@ -2,7 +2,7 @@ package com.child.util.orm;
 
 import com.child.util.ChildDataSource;
 import com.child.util.ChildLogger;
-import com.child.util.orm.bean.MapperStatement;
+import com.child.util.orm.bean.MetaMapperStatement;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 class SimpleSqlSessionFactoryTest {
     private static final DataSource DATASOURCE = ChildDataSource.creatDataSource("default-config");
     private static final Logger LOGGER = ChildLogger.getLogger();
-    private static final Map<String, MapperStatement> mapper = new HashMap<>();
+    private static final Map<String, MetaMapperStatement> mapper = new HashMap<>();
 
     /**
      * 测试构造器

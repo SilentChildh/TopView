@@ -24,7 +24,7 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2023/03/13
  */
-public class DaoImplFactory implements InvocationHandler {
+public class DAOImplFactory implements InvocationHandler {
     /**
      * 注解{@link Param}的类对象，将用于判断是否存在该注解。
      */
@@ -33,21 +33,22 @@ public class DaoImplFactory implements InvocationHandler {
     /**
      * 对应DAO实现类的class对象
      */
-    public Class<?> clazz;
+    public Class<?> implClazz;
 
     /**
      * 获取对应DAO接口的实现类的代理类。<br/>
      * <p/>
      * 用户再获取代理类时，需要注意的是用DAO接口进行引用接收代理类。<b/>
      * 传入的参数则是对应DAO接口实现类的class对象。<br/>
-     *
-     * @param clazz 对应DAO接口实现类的class对象
+     * @param implClazz 对应DAO接口实现类的class对象
      * @return 对应的代理类
+     * @param <T> DAO接口的泛型类型
+     * @throws InstantiationException
+     * @throws IllegalAccessException
      */
-    @SuppressWarnings("unchecked")
-    public <T> T getDaoImplProxy(Class<T> clazz) {
-        this.clazz = clazz;
-        return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{clazz},this);
+    public <T> T getDAOImplProxy(Class<? extends T> implClazz) {
+        this.implClazz = implClazz;
+        return (T) Proxy.newProxyInstance(implClazz.getClassLoader(), implClazz.getInterfaces(),this);
     }
 
 
@@ -94,7 +95,7 @@ public class DaoImplFactory implements InvocationHandler {
             object = parametersMap;
         }
 
-        String implName = clazz.getName();
+        String implName = implClazz.getName();
         int index = implName.indexOf("DAO");
         String sqlId = implName.substring(0, index + 3) + '.' + method.getName();
         Class<?> returnType = method.getReturnType();

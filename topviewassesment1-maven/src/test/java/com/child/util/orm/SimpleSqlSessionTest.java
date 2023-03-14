@@ -3,7 +3,7 @@ package com.child.util.orm;
 import com.child.pojo.UserPO;
 import com.child.util.ChildDataSource;
 import com.child.util.ChildLogger;
-import com.child.util.orm.bean.MapperStatement;
+import com.child.util.orm.bean.MetaMapperStatement;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +24,7 @@ public class SimpleSqlSessionTest {
     public static final DataSource DATASOURCE = ChildDataSource.creatDataSource("default-config");
     public static final Transaction TRANSACTION = new JdbcTransaction(DATASOURCE);
     public static final Transaction TRANSACTION_AUTO_COMMIT = new JdbcTransaction(DATASOURCE, true);
-    public static final Map<String, MapperStatement> mapper = new HashMap<>();
+    public static final Map<String, MetaMapperStatement> mapper = new HashMap<>();
     public static final Logger LOGGER = ChildLogger.getLogger();
     /**
      * 测试构造器。
@@ -305,8 +305,8 @@ public class SimpleSqlSessionTest {
         String sqlType = "insert";
         String resultType = "com.child.pojo.UserPO";
         // 在映射集合中添加一条SQL映射
-        MapperStatement mapperStatement = new MapperStatement(sqlId, sqlType, prototypeSql, resultType);
-        mapper.put(sqlId, mapperStatement);
+        MetaMapperStatement metaMapperStatement = new MetaMapperStatement(sqlId, sqlType, prototypeSql, resultType);
+        mapper.put(sqlId, metaMapperStatement);
         // 创建一个对象
         UserPO userPO = new UserPO(null, "红花", "@qq.com", "beijing");
         // 创建会话类进行更新
@@ -335,8 +335,8 @@ public class SimpleSqlSessionTest {
             String sqlType = "insert";
             String resultType = "com.child.pojo.UserPO";
             // 在映射集合中添加一条SQL映射
-            MapperStatement mapperStatement = new MapperStatement(sqlId, sqlType, prototypeSql, resultType);
-            mapper.put(sqlId, mapperStatement);
+            MetaMapperStatement metaMapperStatement = new MetaMapperStatement(sqlId, sqlType, prototypeSql, resultType);
+            mapper.put(sqlId, metaMapperStatement);
             // 创建一个对象
             UserPO userPO = new UserPO(null, "红花", "@qq.com", "beijing");
             // 断言执行成功
@@ -352,8 +352,8 @@ public class SimpleSqlSessionTest {
         String sqlType = "delete";
         String resultType = "com.child.pojo.UserPO";
         // 在映射集合中添加一条SQL映射
-        MapperStatement mapperStatement = new MapperStatement(sqlId, sqlType, prototypeSql, resultType);
-        mapper.put(sqlId, mapperStatement);
+        MetaMapperStatement metaMapperStatement = new MetaMapperStatement(sqlId, sqlType, prototypeSql, resultType);
+        mapper.put(sqlId, metaMapperStatement);
         // 创建一个对象
         UserPO userPO = new UserPO(null, "张三", null, null);
         // 创建会话类进行更新
@@ -382,8 +382,8 @@ public class SimpleSqlSessionTest {
             String sqlType = "insert";
             String resultType = "com.child.pojo.UserPO";
             // 在映射集合中添加一条SQL映射
-            MapperStatement mapperStatement = new MapperStatement(sqlId, sqlType, prototypeSql, resultType);
-            mapper.put(sqlId, mapperStatement);
+            MetaMapperStatement metaMapperStatement = new MetaMapperStatement(sqlId, sqlType, prototypeSql, resultType);
+            mapper.put(sqlId, metaMapperStatement);
             // 创建一个对象
             UserPO userPO = new UserPO(null, "梨花", "@qq.com", "beijing");
             // 断言执行成功
@@ -398,8 +398,8 @@ public class SimpleSqlSessionTest {
         String sqlType = "update";
         String resultType = "com.child.pojo.UserPO";
         // 在映射集合中添加一条SQL映射
-        MapperStatement mapperStatement = new MapperStatement(sqlId, sqlType, prototypeSql, resultType);
-        mapper.put(sqlId, mapperStatement);
+        MetaMapperStatement metaMapperStatement = new MetaMapperStatement(sqlId, sqlType, prototypeSql, resultType);
+        mapper.put(sqlId, metaMapperStatement);
         // 创建一个对象
         UserPO userPO = new UserPO(null, "梨花", null, null);
         // 创建会话类进行更新
@@ -425,8 +425,8 @@ public class SimpleSqlSessionTest {
         String sqlType = "select";
         String resultType = "com.child.pojo.UserPO";
         // 在映射集合中添加一条SQL映射
-        MapperStatement mapperStatement = new MapperStatement(sqlId, sqlType, prototypeSql, resultType);
-        mapper.put(sqlId, mapperStatement);
+        MetaMapperStatement metaMapperStatement = new MetaMapperStatement(sqlId, sqlType, prototypeSql, resultType);
+        mapper.put(sqlId, metaMapperStatement);
 
         UserPO userPO = new UserPO(null, "李四", null, null, null);
         try (SimpleSqlSession simpleSqlSession = new SimpleSqlSession(TRANSACTION, mapper)) {
@@ -449,8 +449,8 @@ public class SimpleSqlSessionTest {
         String sqlType = "select";
         String resultType = "com.child.pojo.UserPO";
         // 在映射集合中添加一条SQL映射
-        MapperStatement mapperStatement = new MapperStatement(sqlId, sqlType, prototypeSql, resultType);
-        mapper.put(sqlId, mapperStatement);
+        MetaMapperStatement metaMapperStatement = new MetaMapperStatement(sqlId, sqlType, prototypeSql, resultType);
+        mapper.put(sqlId, metaMapperStatement);
 
         UserPO userPO = new UserPO(222L, null, null, null, null);
         try (SimpleSqlSession simpleSqlSession = new SimpleSqlSession(TRANSACTION, mapper)) {
