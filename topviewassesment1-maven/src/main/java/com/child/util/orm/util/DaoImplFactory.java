@@ -24,7 +24,7 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2023/03/13
  */
-public class DAOImplFactory implements InvocationHandler {
+public class DaoImplFactory implements InvocationHandler {
     /**
      * 注解{@link Param}的类对象，将用于判断是否存在该注解。
      */
@@ -40,13 +40,12 @@ public class DAOImplFactory implements InvocationHandler {
      * <p/>
      * 用户再获取代理类时，需要注意的是用DAO接口进行引用接收代理类。<b/>
      * 传入的参数则是对应DAO接口实现类的class对象。<br/>
+     *
      * @param implClazz 对应DAO接口实现类的class对象
      * @return 对应的代理类
-     * @param <T> DAO接口的泛型类型
-     * @throws InstantiationException
-     * @throws IllegalAccessException
      */
-    public <T> T getDAOImplProxy(Class<? extends T> implClazz) {
+    @SuppressWarnings("unchecked")
+    public <T> T getDaoImplProxy(Class<? extends T> implClazz) {
         this.implClazz = implClazz;
         return (T) Proxy.newProxyInstance(implClazz.getClassLoader(), implClazz.getInterfaces(),this);
     }
