@@ -1,6 +1,6 @@
 package com.child.util.xml;
 
-import com.child.util.orm.bean.MapperStatement;
+import com.child.util.orm.bean.MetaMapperStatement;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -19,7 +19,7 @@ public class ParseMapperHandler extends DefaultHandler {
     /**
      * mapper.xml文件中每个标签的数据
      */
-    private MapperStatement mapperStatement;
+    private MetaMapperStatement metaMapperStatement;
     /**
      * mapper.xml文件中的命名空间
      */
@@ -28,7 +28,7 @@ public class ParseMapperHandler extends DefaultHandler {
      * 用于保存每个mapper.xml文件中的映射语句的数据，
      * K为SQL映射对象的全限定id，V为SQL映射对象
      */
-    private final Map<String, MapperStatement> statementMapper = new HashMap<>();
+    private final Map<String, MetaMapperStatement> statementMapper = new HashMap<>();
 
     /**
      * 用于创建解析器
@@ -41,7 +41,7 @@ public class ParseMapperHandler extends DefaultHandler {
      * <p/>
      * @return  Map<String, MapperStatement> Key为每条crud标签的全限定id，Value为每条curd标签中的属性、元素
      */
-    public Map<String, MapperStatement> getStatementMapper() {
+    public Map<String, MetaMapperStatement> getStatementMapper() {
         return statementMapper;
     }
 
@@ -74,27 +74,27 @@ public class ParseMapperHandler extends DefaultHandler {
         }
         else {
             // 每得到一个新的CRUD标签就新建一个映射对象
-            mapperStatement = new MapperStatement();
+            metaMapperStatement = new MetaMapperStatement();
 
             // 接下来四条语句为映射对象中的sqlType进行赋值
             if (QualifiedName.INSERT.equals(qName)) {
-                mapperStatement.setSqlType(QualifiedName.INSERT);
+                metaMapperStatement.setSqlType(QualifiedName.INSERT);
             }
             else if (QualifiedName.UPDATE.equals(qName)) {
-                mapperStatement.setSqlType(QualifiedName.UPDATE);
+                metaMapperStatement.setSqlType(QualifiedName.UPDATE);
             }
             else if (QualifiedName.DELETE.equals(qName)) {
-                mapperStatement.setSqlType(QualifiedName.DELETE);
+                metaMapperStatement.setSqlType(QualifiedName.DELETE);
             }
             else if (QualifiedName.SELECT.equals(qName)) {
-                mapperStatement.setSqlType(QualifiedName.SELECT);
+                metaMapperStatement.setSqlType(QualifiedName.SELECT);
             }
             // 获取标签内属性id，与namespace进行拼接得到sql语句的映射位置,并且给映射对象中的sqlId赋值
             String sqlId = namespace + '.' + attributes.getValue(QualifiedName.ID).trim();
-            mapperStatement.setSqlId(sqlId);
+            metaMapperStatement.setSqlId(sqlId);
             // 最后对返回值类型属性赋值
             String resultType = attributes.getValue(QualifiedName.RESULT_TYPE);
-            mapperStatement.setResultType(resultType);
+            metaMapperStatement.setResultType(resultType);
 
         }
     }
@@ -116,9 +116,9 @@ public class ParseMapperHandler extends DefaultHandler {
     public void endElement(String uri, String localName, String qName) {
         // 匹配crud标签，将全限定id和映射对象放入hashMap中
         if (!QualifiedName.MAPPER.equals(qName)) {
-            statementMapper.put(mapperStatement.getSqlId(), mapperStatement);
+            statementMapper.put(metaMapperStatement.getSqlId(), metaMapperStatement);
             // 每当解析完一个SQL映射对象之后，将引用指向null
-            mapperStatement = null;
+            metaMapperStatement = null;
         }
     }
 
@@ -138,8 +138,8 @@ public class ParseMapperHandler extends DefaultHandler {
         // 为映射对象中的prototypeSql赋值，即赋值xml文件中的原生sql语句
         String value = new String(ch, start, length).trim();
         // 如果不为null，说明此时已经进入CRUD标签内
-        if (mapperStatement != null) {
-            mapperStatement.setPrototypeSql(value);
+        if (metaMapperStatement != null) {
+            metaMapperStatement.setPrototypeSql(value);
         }
     }
 
