@@ -5,7 +5,7 @@ import com.child.util.ChildLogger;
 import com.child.util.orm.SimpleSqlSessionFactory;
 import com.child.util.orm.SqlSession;
 import com.child.util.orm.SqlSessionFactory;
-import com.child.util.orm.bean.MapperStatement;
+import com.child.util.orm.bean.MetaMapperStatement;
 import com.child.util.xml.ParseXmlUtils;
 
 import javax.sql.DataSource;
@@ -56,7 +56,7 @@ public class SimpleSqlSessionUtil {
         // 根据配置文件的全限定类名来创建数据库资源
         DataSource childDataSource = ChildDataSource.creatDataSource(resource);
         // 对mapper.xml进行解析，并接收原生SQL映射对象集合
-        Map<String, MapperStatement> mapperStatementMap = getStatementMapperFromPackage(PACKAGE_NAME);
+        Map<String, MetaMapperStatement> mapperStatementMap = getStatementMapperFromPackage(PACKAGE_NAME);
 
         // 创建工厂类
         SqlSessionFactory simpleSqlSessionFactory =
@@ -123,10 +123,10 @@ public class SimpleSqlSessionUtil {
      * @return Map<String, MapperStatement>返回包含dao包下所有的mapper.xml文件中对应的SQL映射对象集合。
      * K为全限定id，V为SQL映射对象。
      */
-    public static Map<String, MapperStatement> getStatementMapperFromPackage(String packageName) {
+    public static Map<String, MetaMapperStatement> getStatementMapperFromPackage(String packageName) {
         // 用于接收SQL映射对象
         // noinspection AlibabaCollectionInitShouldAssignCapacity
-        Map<String, MapperStatement> mapperStatementMap = new HashMap<>();
+        Map<String, MetaMapperStatement> mapperStatementMap = new HashMap<>();
 
         // 获取XML文件
         List<File> xmlFiles = ParseXmlUtils.getXmlFileFromPackage(packageName);
@@ -143,10 +143,10 @@ public class SimpleSqlSessionUtil {
      * @return Map<String, MapperStatement> 返回对应目录下的SQL映射对象，
      * K为SQL的全限定id，V为SQL映射对象
      */
-    private static Map<String, MapperStatement> getStatementMapperFromDirectory(String directoryPath) {
+    private static Map<String, MetaMapperStatement> getStatementMapperFromDirectory(String directoryPath) {
         // 用于接收SQL映射对象
         // noinspection AlibabaCollectionInitShouldAssignCapacity
-        Map<String, MapperStatement> mapperStatementMap = new HashMap<>();
+        Map<String, MetaMapperStatement> mapperStatementMap = new HashMap<>();
 
         // 获取XML文件
         List<File> xmlFiles = ParseXmlUtils.getXmlFileFromDirectory(directoryPath);

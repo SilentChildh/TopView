@@ -1,7 +1,7 @@
 package com.child.util.orm;
 
 import com.child.util.ChildLogger;
-import com.child.util.orm.bean.MapperStatement;
+import com.child.util.orm.bean.MetaMapperStatement;
 
 import javax.sql.DataSource;
 import java.util.Map;
@@ -28,7 +28,7 @@ public class SimpleSqlSessionFactory implements SqlSessionFactory{
      * 每一个SimpleSqlSessionFactory实例都将持有一个<strong>唯一</strong>的SQL映射集合。<br/>
      * 对于每一个SimpleSqlSession实例都将获得该SQL映射集合的可读权限。
      */
-    private final Map<String, MapperStatement> statementMap;
+    private final Map<String, MetaMapperStatement> statementMap;
 
     /**
      * 用于创建一个SimpleSqlSessionFactory实例，
@@ -36,7 +36,7 @@ public class SimpleSqlSessionFactory implements SqlSessionFactory{
      * @param dataSource 一个事务管理器
      * @param statementMap 一个承载SQL映射语句的集合
      */
-    public SimpleSqlSessionFactory(DataSource dataSource, Map<String, MapperStatement> statementMap) {
+    public SimpleSqlSessionFactory(DataSource dataSource, Map<String, MetaMapperStatement> statementMap) {
         this.dataSource = dataSource;
         this.statementMap = statementMap;
     }

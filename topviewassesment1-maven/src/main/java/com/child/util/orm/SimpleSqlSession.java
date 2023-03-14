@@ -2,7 +2,7 @@ package com.child.util.orm;
 
 import com.child.util.ChildLogger;
 import com.child.util.orm.bean.ForPreparedStatement;
-import com.child.util.orm.bean.MapperStatement;
+import com.child.util.orm.bean.MetaMapperStatement;
 import com.child.util.orm.handler.*;
 
 import java.sql.*;
@@ -38,7 +38,7 @@ public class SimpleSqlSession implements SqlSession {
      * 每一个sqlSession实例将拥有{@link SimpleSqlSessionFactory}类中所有SQL语句映射的访问权限。
      * K为sql语句全限定id，V为包含标签信息的对象
      */
-    private Map<String, MapperStatement> statementMap;
+    private Map<String, MetaMapperStatement> statementMap;
     /**
      * 每次调用CRUD操作时，都会进行拦截判断传入的实参类型，从而选择不同的SQL处理器。<br/>
      * 主要的两种处理器为{@link MapSqlHandler}和{@link ObjectSqlHandler}.<br/>
@@ -52,7 +52,7 @@ public class SimpleSqlSession implements SqlSession {
      * @param statementMap 包含SQL映射语句的集合
      * @return {@link SimpleSqlSession}
      */
-    public SimpleSqlSession(Transaction transaction, Map<String, MapperStatement> statementMap) {
+    public SimpleSqlSession(Transaction transaction, Map<String, MetaMapperStatement> statementMap) {
         this.transaction = transaction;
         this.statementMap = statementMap;
     }
@@ -135,9 +135,9 @@ public class SimpleSqlSession implements SqlSession {
         setSqlHandler(parameters);
 
         // 根据全限定id，即statement获取对应的SQL映射对象
-        MapperStatement mapperStatement = statementMap.get(sqlId);
+        MetaMapperStatement metaMapperStatement = statementMap.get(sqlId);
         // 获取对应的原生SQL语句
-        String prototypeSql = mapperStatement.getPrototypeSql();
+        String prototypeSql = metaMapperStatement.getPrototypeSql();
 
         /*封装数据*/
         ForPreparedStatement forPreparedStatement = new ForPreparedStatement(connection, prototypeSql);
@@ -200,9 +200,9 @@ public class SimpleSqlSession implements SqlSession {
     @Override
     public <E> List<E> selectList(String sqlId, Object parameters) throws SQLException {
         // 获取SQL映射对象
-        MapperStatement mapperStatement = statementMap.get(sqlId);
+        MetaMapperStatement metaMapperStatement = statementMap.get(sqlId);
         // 获取SQL返回值类型
-        String resultType = mapperStatement.getResultType();
+        String resultType = metaMapperStatement.getResultType();
 
         try {
             // 创建对应返回值类型的Class对象
@@ -232,9 +232,9 @@ public class SimpleSqlSession implements SqlSession {
         setSqlHandler(parameters);
 
         // 获取SQL映射对象
-        MapperStatement mapperStatement = statementMap.get(sqlId);
+        MetaMapperStatement metaMapperStatement = statementMap.get(sqlId);
         // 获取原始SQL
-        String prototypeSql = mapperStatement.getPrototypeSql();
+        String prototypeSql = metaMapperStatement.getPrototypeSql();
 
         /*封装数据*/
         ForPreparedStatement forPreparedStatement = new ForPreparedStatement(connection, prototypeSql);

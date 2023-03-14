@@ -7,7 +7,7 @@ package com.child.util.orm.bean;
  * @version 1.0
  **/
 
-public class MapperStatement {
+public class MetaMapperStatement {
 
     /**
      * 加上了namespace的全限定id
@@ -26,9 +26,9 @@ public class MapperStatement {
      * 每个CRUD中的返回值类型属性
      */
     private String resultType;
-    public MapperStatement() {}
+    public MetaMapperStatement() {}
 
-    public MapperStatement(String sqlId, String sqlType, String prototypeSql, String resultType) {
+    public MetaMapperStatement(String sqlId, String sqlType, String prototypeSql, String resultType) {
         this.sqlId = sqlId;
         this.sqlType = sqlType;
         this.prototypeSql = prototypeSql;
