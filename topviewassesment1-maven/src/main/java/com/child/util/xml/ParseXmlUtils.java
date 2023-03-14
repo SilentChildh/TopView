@@ -33,8 +33,11 @@ public class ParseXmlUtils {
      * @return {@link List}<{@link File}> 返回指定包下的所有xml文件集合
      */
     public static List<File> getXmlFileFromPackage(String packageName) {
-        final String file = "file";
+        // 接收文件的容器
+        Stream<File> stream = new ArrayList<File>().stream();
+
         try {
+            final String file = "file";
             // 获取指定包下的所有文件的URL
             Enumeration<URL> resources = Thread.currentThread()
                     .getContextClassLoader()
@@ -49,15 +52,16 @@ public class ParseXmlUtils {
                 String protocol = url.getProtocol();
                 // 如果满足协议，则进行解析，并将解析后的元素合并到集合中
                 if (file.equals(protocol)) {
-                    return getXmlFileFromDirectory(url.getPath());
+                    stream = Stream.concat(stream, getXmlFileFromDirectory(url.getPath()).stream());
                 }
             }
 
         } catch (IOException e) {
             throw new RuntimeException("通过包名获取XML文件失败\n" + e.getMessage());
         }
-        // 不存在文件则返回一个空list
-        return new ArrayList<>();
+
+        // 返回结果
+        return stream.collect(Collectors.toList());
     }
 
     /**
@@ -84,7 +88,10 @@ public class ParseXmlUtils {
 
         // 获取目录下的所有".xml"结尾的文件和子目录
         File[] files =
-                currentFile.listFiles(file -> file.getName().endsWith(".xml") || file.isDirectory());
+                currentFile.listFiles(file -> {
+                    boolean b = file.getName().endsWith(".xml");
+                    return b;
+                });
 
         // 如果不存在文件，返回一个空list
         if (files == null) {
