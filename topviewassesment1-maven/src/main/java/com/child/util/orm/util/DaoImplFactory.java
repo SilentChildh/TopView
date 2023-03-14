@@ -2,6 +2,7 @@ package com.child.util.orm.util;
 
 import com.child.util.orm.SqlSession;
 import com.child.util.orm.annotation.Param;
+import com.child.util.orm.handler.ParametersHandler;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
@@ -43,9 +44,8 @@ public class DaoImplFactory implements InvocationHandler {
      * @param clazz 对应DAO接口实现类的class对象
      * @return 对应的代理类
      * @param <T> DAO接口的泛型类型
-     * @throws InstantiationException
-     * @throws IllegalAccessException
      */
+    @SuppressWarnings("unchecked")
     public <T> T getDaoImplProxy(Class<T> clazz) {
         this.clazz = clazz;
         return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{clazz},this);
@@ -63,37 +63,9 @@ public class DaoImplFactory implements InvocationHandler {
         // 用于存储原Map集合元素或者被注解修饰的参数。
         // noinspection AlibabaCollectionInitShouldAssignCapacity
         final Map<String, Object> parametersMap = new HashMap<>();
-        // 用于接收单参数
-        Object object;
-        // 获取方法形参的数据
-        Parameter[] parameters = method.getParameters();
 
-        // 特判无参或者只有一个实参且无注解修饰时的情况
-        boolean noneParameter = parameters.length == 0;
-        boolean singleParameter = (!parameters[0].isAnnotationPresent(PARAM_ANNOTATION) && parameters.length == 1);
-        if (noneParameter || singleParameter) {
-            object = args[0];
-        }
-        // 否则进行是否带有的注解判断
-        else {
-            // 如果第一个实参是Map，则将其元素放入代理类中的Map集合中
-            if (args[0] instanceof Map) {
-                parametersMap.putAll((Map<String, Object>) args[0]);
-            }
-            // 如果实参不是Map，则判断是否有注解
-            else {
-                for (int i = 0; i < parameters.length; i++) {
-                    // 判断是否被Param注解修饰
-                    if (parameters[i].isAnnotationPresent(PARAM_ANNOTATION)) {
-                        // 如果是，就获取该注解中的值作为K，传入的实参作为V，然后将其放入Map中
-                        Param param = (Param) parameters[i].getAnnotation(PARAM_ANNOTATION);
-                        parametersMap.put(param.value(), args[i]);
-                    }
-                }
-            }
-
-            object = parametersMap;
-        }
+        ParametersHandler parametersHandler = new ParametersHandler(method.getName(), clazz, args);
+        Object handle = parametersHandler.handle();
 
         String implName = clazz.getName();
         int index = implName.indexOf("DAO");
@@ -101,13 +73,13 @@ public class DaoImplFactory implements InvocationHandler {
         Class<?> returnType = method.getReturnType();
         /*调用会话类的方法，对数据库执行CRUD操作*/
         if (returnType == int.class) {
-            return sqlSession.update(sqlId, object);
+            return sqlSession.update(sqlId, handle);
         }
         else if (returnType == List.class) {
-            return sqlSession.selectList(sqlId, object);
+            return sqlSession.selectList(sqlId, handle);
         }
         else {
-            return sqlSession.selectOne(sqlId, object);
+            return sqlSession.selectOne(sqlId, handle);
         }
 
     }
