@@ -1,7 +1,7 @@
 package com.child.util.orm;
 
 import com.child.util.ChildLogger;
-import com.child.util.orm.bean.MapperStatement;
+import com.child.util.orm.bean.MetaMapperStatement;
 import com.child.util.orm.util.SimpleSqlSessionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -33,8 +33,8 @@ class SimpleSqlSessionUtilTest {
                     simpleSqlSessionUtilClass.getDeclaredField("SQL_SESSION_FACTORY_MAP");
             sqlSessionFactoryMap.setAccessible(true);// 设置为可访问
             // 获取Map集合
-            Map<String, MapperStatement> mapperStatementMap =
-                    (Map<String, MapperStatement>) sqlSessionFactoryMap.get(sqlSessionFactoryMap);
+            Map<String, MetaMapperStatement> mapperStatementMap =
+                    (Map<String, MetaMapperStatement>) sqlSessionFactoryMap.get(sqlSessionFactoryMap);
             // 断言此时集合元素数量为0
             Assertions.assertEquals(0, mapperStatementMap.size());
 
@@ -86,8 +86,8 @@ class SimpleSqlSessionUtilTest {
             Method getMapperFromDirectory =
                     simpleSqlSessionUtilClass.getDeclaredMethod("getStatementMapperFromDirectory", String.class);
             getMapperFromDirectory.setAccessible(true);// 设置为可访问
-            Map<String, MapperStatement> invoke =
-                    (Map<String, MapperStatement>) getMapperFromDirectory.invoke(null, directorName);
+            Map<String, MetaMapperStatement> invoke =
+                    (Map<String, MetaMapperStatement>) getMapperFromDirectory.invoke(null, directorName);
             invoke.entrySet().stream()
                     .forEach(entry -> LOGGER.info(entry.getKey() + "\t" + entry.getValue()));
 
@@ -102,7 +102,7 @@ class SimpleSqlSessionUtilTest {
     @Test
     void testGetStatementMapperFromPackage() {
         String packageName = "com.child.dao";
-        Map<String, MapperStatement> statementMapperFromPackage =
+        Map<String, MetaMapperStatement> statementMapperFromPackage =
                 SimpleSqlSessionUtil.getStatementMapperFromPackage(packageName);
 
         statementMapperFromPackage.entrySet().stream()
