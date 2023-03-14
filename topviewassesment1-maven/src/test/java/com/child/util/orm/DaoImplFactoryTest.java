@@ -1,7 +1,6 @@
 package com.child.util.orm;
 
 import com.child.dao.UserDAO;
-import com.child.dao.UserDAOImpl;
 import com.child.pojo.UserPO;
 import com.child.util.ChildLogger;
 import com.child.util.orm.util.DaoImplFactory;
