@@ -1340,35 +1340,23 @@ public class MapSqlHandler implements SqlHandler {
 
 6. 现在你可以使用DAO接口实现类的代理类来代替编写重复且繁杂的实现类
 
-    1. 你只需要简单的编写一个DAO的实现类即可，无需编写方法体内的代码。如：
+    1. 您现在不再需要编写一个DAO的实现类
 
-        ~~~java
-        public class UserDAOImpl implements UserDAO{
-            public static final Class<UserDAO> USERDAO_CLASS = UserDAO.class;
-            @Override
-            public int insert(UserPO userPO) throws SQLException {
-                return 0;
-            }
-        }
-        ~~~
-
-    2. 此后，当您需要一个实现类的时候，你应该创建一个通用的工厂类`DAOImplFactory`。该工厂类将会提供您所需要实现类。
-
+    2. 此后，当您需要一个DAO接口的实现类的时候，你应该创建一个通用的工厂类`DAOImplFactory`。该工厂类将会提供您所需要实现类。
+    
         1. 具体操作：
-            1. 创建一个工厂类，然后调用`getDAOImplProxy()`方法，并传入您所需的实现类的class对象
-            2. 需要注意的是，您应该使用对应的DAO接口来接收，而不是使用实现类来接收，否则会抛出异常
+            1. 创建一个工厂类，然后调用`getDAOImplProxy()`方法，并传入对应DAO接口的class对象，此后将返回一个实现类
             3. 获取到对应的实现类代理类后，您就可以正常的进行数据库操作了
-
         2. 使用示例如下：
-
+    
         ~~~java
-        class DAOImplFactoryTest {
+    class DaoImplFactoryTest {
             private final Logger logger = ChildLogger.getLogger();
         
             @Test
             void getDAOImplProxy() throws SQLException {
                 // 执行查询
-                UserDAO daoImplProxy = new DAOImplFactory().getDAOImplProxy(UserDAOImpl.class);
+                UserDAO daoImplProxy = new DaoImplFactory().getDaoImplProxy(UserDAO.class);
                 List<Object> list = daoImplProxy.selectByName("李四");
                 // 断言以及打印日志
                 Assertions.assertNotNull(list);
@@ -1380,7 +1368,7 @@ public class MapSqlHandler implements SqlHandler {
                 // 用于操作事务
                 SqlSession sqlSession = SimpleSqlSessionUtil.openSession();
                 // 执行操作
-                UserDAO daoImplProxy = new DAOImplFactory().getDAOImplProxy(UserDAOImpl.class);
+                UserDAO daoImplProxy = new DaoImplFactory().getDaoImplProxy(UserDAO.class);
                 UserPO userPO = new UserPO(null, "张三", "@qq.com", "CN", "GTR");
                 int insert = daoImplProxy.insert(userPO);
                 int i = daoImplProxy.updateById(246L, "樱花", "马车");
@@ -1390,10 +1378,11 @@ public class MapSqlHandler implements SqlHandler {
                 sqlSession.commit();
                 sqlSession.close();
             }
+        
         }
         ~~~
-
         
+    
 
 
 
