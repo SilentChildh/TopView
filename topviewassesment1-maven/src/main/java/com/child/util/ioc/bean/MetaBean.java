@@ -1,6 +1,6 @@
 package com.child.util.ioc.bean;
 
-import java.util.Objects;
+import java.util.Map;
 
 /**
  * 用于存储bean实例的相关信息。<br/>
@@ -19,29 +19,42 @@ public class MetaBean {
     private String id;
 
     /**
-     * 对应bean的类
+     * 对应bean的class对象
      */
     private Class<?> clazz;
 
-    @Override
-    public String toString() {
-        return "MetaBean{" +
-                "id='" + id + '\'' +
-                ", clazz=" + clazz +
-                '}';
+    /**
+     * 保存对应bean实例每个字段的值set的值
+     */
+    private Map<String, String> properties;
+    /**
+     * 保存对应bean实例构造器的实参值
+     */
+    private Map<String, String> constructorArgs;
+
+    public MetaBean(String id, Class<?> clazz,
+                    Map<String, String> properties,
+                    Map<String, String> constructorArgs) {
+        this.id = id;
+        this.clazz = clazz;
+        this.properties = properties;
+        this.constructorArgs = constructorArgs;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MetaBean metaBean = (MetaBean) o;
-        return Objects.equals(id, metaBean.id) && Objects.equals(clazz, metaBean.clazz);
+    public Map<String, String> getConstructorArgs() {
+        return constructorArgs;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, clazz);
+    public void setConstructorArgs(Map<String, String> constructorArgs) {
+        this.constructorArgs = constructorArgs;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
 
     public MetaBean() {
