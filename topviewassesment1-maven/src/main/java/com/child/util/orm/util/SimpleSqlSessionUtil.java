@@ -6,20 +6,13 @@ import com.child.util.orm.SimpleSqlSessionFactory;
 import com.child.util.orm.SqlSession;
 import com.child.util.orm.SqlSessionFactory;
 import com.child.util.orm.bean.MapperStatement;
-import com.child.util.orm.xml.ParseMapperHandler;
-import org.xml.sax.SAXException;
+import com.child.util.xml.ParseXMLUtils;
 
 import javax.sql.DataSource;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * orm的工具类。<br/>
@@ -134,104 +127,33 @@ public class SimpleSqlSessionUtil {
         // 用于接收SQL映射对象
         // noinspection AlibabaCollectionInitShouldAssignCapacity
         Map<String, MapperStatement> mapperStatementMap = new HashMap<>();
-        try {
 
-            // 获取指定包下的所有文件的URL
-            Enumeration<URL> resources = Thread.currentThread()
-                    .getContextClassLoader()
-                    // 注意！需要将包名各式转换为目录路径格式
-                    .getResources(packageName.replace('.', '/'));
-            // 遍历每一个URL
-            while (resources.hasMoreElements()) {
-                // 获取URL
-                URL url = resources.nextElement();
-                // 获取协议
-                String protocol = url.getProtocol();
-                // 如果满足协议，则进行解析，并将解析后的元素合并到集合中
-                if (FILE.equals(protocol)) {
-                    mapperStatementMap.putAll(getStatementMapperFromDirectory(url.getPath()));
-                }
-            }
+        // 获取XML文件
+        List<File> xmlFiles = ParseXMLUtils.getXMLFileFromPackage(packageName);
 
-        } catch (IOException e) {
-            throw new RuntimeException("通过包名获取SQL映射集合失败\n" + e.getMessage());
-        }
-        // 最后返回解析后的SQL映射对象
-        logger.info("通过包名获取SQL映射集合成功");
-        return mapperStatementMap;
+        // 解析XML文件，并返回
+        return ParseXMLUtils.parseMapper(xmlFiles);
     }
 
     /**
-     * 返回指定目录下的xml文件中的SQL映射对象。<br/>
+     * 返回指定目录路径下的xml文件中的SQL映射对象。<br/>
      * <p/>
-     * 根据目录名可以获取该目录下的所有xml文件，通过包名可以获取进一步解析子目录。<br/>
-     * 其中核心部分为：
-     * 解析处理器{@link ParseMapperHandler}帮助完成了将xml中的sql映射放置到Map集合中。<br/>
-     * 其中为了提高效率，采用并行流的方式进行收集SQL映射对象到Map集合中。
-     * 同时通过collect终结管道保证了线程安全。<br/>
      *
-     * @param directoryName 指定包名的目录名
+     * @param directoryPath 指定目录路径
      * @return Map<String, MapperStatement> 返回对应目录下的SQL映射对象，
      * K为SQL的全限定id，V为SQL映射对象
      */
-    private static Map<String, MapperStatement> getStatementMapperFromDirectory(String directoryName) {
+    private static Map<String, MapperStatement> getStatementMapperFromDirectory(String directoryPath) {
         // 用于接收SQL映射对象
         // noinspection AlibabaCollectionInitShouldAssignCapacity
         Map<String, MapperStatement> mapperStatementMap = new HashMap<>();
-        // 根据目录创建文件
-        File file = new File(directoryName);
-        // 如果不存在该目录则直接返回一个空的Map
-        if (!file.isDirectory() || !file.exists()) {
-            return mapperStatementMap;
-        }
 
-        // 获取目录下的所有".xml"结尾的文件
-        File[] files = file.listFiles(fileName -> {
-            // 如果存在子目录则继续搜索
-            if (fileName.isDirectory()) {
-                getStatementMapperFromDirectory(fileName.getAbsolutePath());
-            }
-            // 如果不是的话则直接返回后缀为".xml"的文件
-            return fileName.getName().endsWith(".xml");
+        // 获取XML文件
+        List<File> xmlFiles = ParseXMLUtils.getXMLFileFromDirectory(directoryPath);
 
-        });
+        // 解析XML文件，并返回
+        return ParseXMLUtils.parseMapper(xmlFiles);
 
-        // 如果不存在".xml"结尾的文件则直接返回一个空Map
-        if (files == null) {
-            return mapperStatementMap;
-        }
-
-        /*接下来开始对所有".xml"文件进行解析*/
-        try {
-            // 获取解析器工厂
-            SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-            // 获取解析器
-            SAXParser saxParser = saxParserFactory.newSAXParser();
-            // 获取解析器处理器
-            ParseMapperHandler parseMapperHandler = new ParseMapperHandler();
-            Map<String, MapperStatement> collect = Arrays.stream(files)
-                    // 将流中的.xml文件进行解析，返回SQL映射集合的K-V条目
-                    .map(x -> {
-                        try {
-                            saxParser.parse(x, parseMapperHandler);
-                            // 返回K-V条目回到流中
-                            return parseMapperHandler.getStatementMapper().entrySet();
-                        } catch (SAXException | IOException e) {
-                            logger.info("解析Mapper.xml文件失败\n" + e.getMessage());
-                            throw new RuntimeException("解析Mapper.xml文件失败\n" + e.getMessage());
-                        }
-                    })
-                    // 将Set<Entry<String, String>>一对多映射为Entry<String, String>，即从Set集合中取出元素
-                    .flatMap(Set::stream)
-                    // 最后通过线程安全的终结管道操作，将流中元素包装进Map集合中进行返回
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (entity1, entity2) -> entity1));
-
-            logger.info("通过目录路径解析Mapper.xml文件成功");
-            return collect;
-
-        } catch (ParserConfigurationException | SAXException e) {
-            throw new RuntimeException("通过目录路径解析Mapper.xml文件失败\n"  +e.getMessage());
-        }
 
     }
     private static final Logger logger = ChildLogger.getLogger();

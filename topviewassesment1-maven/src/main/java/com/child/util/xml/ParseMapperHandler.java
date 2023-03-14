@@ -1,4 +1,4 @@
-package com.child.util.orm.xml;
+package com.child.util.xml;
 
 import com.child.util.orm.bean.MapperStatement;
 import org.xml.sax.Attributes;
